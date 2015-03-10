@@ -204,7 +204,7 @@ function M.toggle_block()
           local block, r = block:gsub('^(%s*|[^|]*|)', '%1'..newline)
           if r == 0 then block = newline..block end
           buffer:begin_undo_action()
-          buffer.target_start, buffer.target_end = s, p + 1
+          buffer:set_target_range(s, p + 1)
           buffer:replace_target('do'..block..newline..'end')
           local indent = line_indentation[line]
           line_indentation[line + 1] = indent + buffer.tab_width
@@ -222,7 +222,7 @@ function M.toggle_block()
   if r > 0 then
     -- Single-line do ... end block.
     buffer:begin_undo_action()
-    buffer.target_start, buffer.target_end = buffer:position_from_line(line), e
+    buffer:set_target_range(buffer:position_from_line(line), e)
     buffer:replace_target(block)
     buffer:goto_pos(pos - 1)
     buffer:end_undo_action()
@@ -246,7 +246,7 @@ function M.toggle_block()
   block = buffer:text_range(s2, e2):match('^do(.+)end$')
   block = block:gsub('[\r\n]+', ' '):gsub(' +', ' ')
   buffer:begin_undo_action()
-  buffer.target_start, buffer.target_end = s2, e2
+  buffer:set_target_range(s2, e2)
   buffer:replace_target('{'..block..'}')
   buffer:end_undo_action()
 end
