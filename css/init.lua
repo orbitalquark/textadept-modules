@@ -6,11 +6,6 @@ local M = {}
 ---
 -- The css module.
 -- It provides utilities for editing CSS code.
---
--- ## Key Bindings
---
--- + `Ctrl+L, M` (`⌘L, M` on Mac OSX | `M-L, M` in curses)
---   Open this module for editing.
 module('_M.css')]]
 
 -- Sets default buffer properties for CSS files.
@@ -360,11 +355,7 @@ textadept.editing.api_files.css = {_HOME..'/modules/css/api'}
 -- Container for CSS-specific key bindings.
 -- @class table
 -- @name _G.keys.css
-keys.css = {
-  [keys.LANGUAGE_MODULE_PREFIX] = {
-    m = {io.open_file, _HOME..'/modules/css/init.lua'},
-  },
-}
+keys.css = {}
 
 -- Snippets.
 

@@ -9,9 +9,7 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- + `Ctrl+L, M` (`⌘L, M` on Mac OSX | `M-L, M` in curses)
---   Open this module for editing.
--- + `Ctrl+L, A` (`⌘L, A` | `M-L, A`)
+-- + `Ctrl+&` (`⌘&` | `M-&`)
 --   Jump to the anchor for the alias under the caret.
 module('_M.yaml')]]
 
@@ -67,10 +65,7 @@ end
 -- @class table
 -- @name _G.keys.yaml
 keys.yaml = {
-  [keys.LANGUAGE_MODULE_PREFIX] = {
-    m = {io.open_file, _HOME..'/modules/yaml/init.lua'},
-    a = M.goto_anchor
-  }
+  [not OSX and not CURSES and 'c&' or 'm&'] = M.goto_anchor
 }
 
 -- Snippets.

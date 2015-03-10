@@ -9,8 +9,8 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- + `Ctrl+L, M` (`⌘L, M` on Mac OSX | `M-L, M` in curses)
---   Open this module for editing.
+-- + `Shift+Enter` (`⇧↩` | `S-Enter`)
+--   Add ':' to the end of the current line and insert a newline.
 -- @field CHECK_SYNTAX (bool)
 --   Whether or not to invoke Python to check the syntax of the current file
 --   when saving it.
@@ -177,9 +177,6 @@ end)
 -- @class table
 -- @name _G.keys.python
 keys.python = {
-  [keys.LANGUAGE_MODULE_PREFIX] = {
-    m = {io.open_file, _HOME..'/modules/python/init.lua'},
-  },
   ['s\n'] = function()
     buffer:line_end()
     buffer:add_text(':')

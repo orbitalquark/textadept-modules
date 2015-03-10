@@ -9,11 +9,9 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- + `Ctrl+L, M` (`⌘L, M` on Mac OSX | `M-L, M` in curses)
---   Open this module for editing.
--- + `Ctrl+L, G` (`⌘L, G` | `M-L, G`)
+-- + `Ctrl+Alt+J` (`^⌘J` | `M-S-J`)
 --   Jump to the selected section.
--- + `Ctrl+L, O` (`⌘L, O` | `M-L, O`)
+-- + `Shift+Enter` (`⇧↩` | `S-Enter`)
 --   Open the image specified by the directive on the current line.
 --
 -- @field DOCUTILS_PATH (string)
@@ -254,11 +252,8 @@ end
 -- @class table
 -- @name _G.keys.rest
 keys.rest = {
-  [keys.LANGUAGE_MODULE_PREFIX] = {
-    m = {io.open_file, _HOME..'/modules/rest/init.lua'},
-    g = M.goto_section,
-    o = M.open_image,
-  }
+  [not OSX and 'cag' or 'cmg'] = M.goto_section,
+  ['s\n'] = M.open_image,
 }
 
 -- Snippets.

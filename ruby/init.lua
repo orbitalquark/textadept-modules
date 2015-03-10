@@ -9,8 +9,6 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- + `Ctrl+L, M` (`⌘L, M` on Mac OSX | `M-L, M` in curses)
---   Open this module for editing.
 -- + `Shift+Enter` (`⇧↩` | `S-Enter`)
 --   Try to autocomplete an `if`, `while`, `for`, etc. control structure with
 --   `end`.
@@ -258,9 +256,6 @@ end
 -- @class table
 -- @name _G.keys.ruby
 keys.ruby = {
-  [keys.LANGUAGE_MODULE_PREFIX] = {
-    m = {io.open_file, _HOME..'/modules/ruby/init.lua'},
-  },
   ['s\n'] = M.try_to_autocomplete_end,
   ['c{'] = M.toggle_block,
 }
