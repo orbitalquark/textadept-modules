@@ -24,7 +24,6 @@ events.connect(events.LEXER_LOADED, function(lang)
   if lang == 'python' then
     buffer.use_tabs = false
     buffer.tab_width = 4
-    buffer.property['fold.by.indentation'] = '1'
   end
 end)
 
