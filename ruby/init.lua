@@ -141,27 +141,6 @@ function M.try_to_autocomplete_end()
   return false
 end
 
--- Show syntax errors as annotations.
-events.connect(events.FILE_AFTER_SAVE, function()
-  if buffer:get_lexer() == 'ruby' then
-    buffer:annotation_clear_all()
-    local dir, filename = buffer.filename:match('^(.+[/\\])([^/\\]+)$')
-    dir, filename = dir:gsub('\\', '\\\\'), filename:gsub('\\', '\\\\')
-    local p = io.popen('ruby -C"'..dir..'" -c "'..filename..'" 2>&1')
-    local out = p:read('*a')
-    p:close()
-    if not out:match('^Syntax OK') then
-      local line, err_msg = out:match('^[^:]+:(%d+): (.+)\r?\n$')
-      if line then
-        buffer.annotation_visible = 2
-        buffer.annotation_text[line - 1] = err_msg
-        buffer.annotation_style[line - 1] = 8 -- error style number
-        buffer:goto_line(line - 1)
-      end
-    end
-  end
-end)
-
 -- Contains newline sequences for buffer.eol_mode.
 -- This table is used by toggle_block().
 -- @class table

@@ -11,13 +11,7 @@ local M = {}
 --
 -- + `Shift+Enter` (`⇧↩` | `S-Enter`)
 --   Add ':' to the end of the current line and insert a newline.
--- @field CHECK_SYNTAX (bool)
---   Whether or not to invoke Python to check the syntax of the current file
---   when saving it.
---   The default value is `true`.
 module('_M.python')]]
-
-M.CHECK_SYNTAX = true
 
 -- Sets default buffer properties for Python files.
 events.connect(events.LEXER_LOADED, function(lang)
@@ -134,39 +128,6 @@ events.connect(events.CHAR_ADDED, function(ch)
           break
         end
       end
-    end
-  end
-end)
-
--- Show syntax errors as annotations.
-events.connect(events.FILE_AFTER_SAVE, function()
-  if buffer:get_lexer() ~= 'python' or not M.CHECK_SYNTAX then return end
-  buffer:annotation_clear_all()
-  local python = textadept.run.run_commands.python:match('^%S+')
-  local p = io.popen(python..' -V 2>&1')
-  local version = p:read('*a'):match('^Python ([%d.]+)')
-  local python3 = version >= '2.7.4' -- 2.7.4 has backported Python3 message
-  p:close()
-  p = io.popen(python..' -m py_compile "'..buffer.filename..'" 2>&1')
-  local out = p:read('*a')
-  p:close()
-  if out:match(python3 and '^%s*File' or '^SyntaxError') then
-    local line = out:match(python3 and '^%s*File ".-", line (%d+)' or
-                           buffer.filename..'\',%s+(%d+)')
-    if line and tonumber(line) > 0 then
-      line = tonumber(line) - 1
-      local msg = python3 and out:match('^[^\r\n]+[\r\n]+(.-)%s*$') or
-                  'SyntaxError: invalid syntax'
-      -- If the error line is not onscreen, annotate the current line.
-      if (line < buffer.first_visible_line or
-          line > buffer.first_visible_line + buffer.lines_on_screen) then
-        msg = 'line '..(line + 1)..'\n'..msg
-        line = buffer:line_from_position(buffer.current_pos)
-      end
-      buffer.annotation_visible = 2
-      buffer.annotation_text[line] = msg
-      buffer.annotation_style[line] = 8 -- error style number
-      buffer:goto_line(line)
     end
   end
 end)
