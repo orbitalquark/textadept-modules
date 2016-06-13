@@ -151,7 +151,9 @@ textadept.editing.autocompleters.rest = function()
   return #part, list
 end
 
-textadept.editing.api_files.rest = {_HOME..'/modules/rest/api'}
+textadept.editing.api_files.rest = {
+  _HOME..'/modules/rest/api', _USERHOME..'/modules/rest/api'
+}
 
 -- Commands.
 

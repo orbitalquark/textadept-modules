@@ -347,7 +347,9 @@ textadept.editing.autocompleters.css = function()
   return #part, list
 end
 
-textadept.editing.api_files.css = {_HOME..'/modules/css/api'}
+textadept.editing.api_files.css = {
+  _HOME..'/modules/css/api', _USERHOME..'/modules/css/api'
+}
 
 -- Commands.
 

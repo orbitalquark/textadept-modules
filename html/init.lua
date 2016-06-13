@@ -309,7 +309,9 @@ textadept.editing.autocompleters.html = function()
   end
 end
 
-textadept.editing.api_files.html = {_HOME..'/modules/html/api'}
+textadept.editing.api_files.html = {
+  _HOME..'/modules/html/api', _USERHOME..'/modules/html/api'
+}
 
 -- Commands.
 
