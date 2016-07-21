@@ -158,12 +158,11 @@ textadept.editing.api_files.rest = {
 -- Commands.
 
 -- Add '`' to autopaired and typeover characters.
-textadept.editing.char_matches.rest = {
-  [40] = ')', [91] = ']', [123] = '}', [39] = "'", [34] = '"', [96] = '`'
-}
-textadept.editing.typeover_chars = {
-  [41] = 1, [93] = 1, [125] = 1, [39] = 1, [34] = 1, [96] = 1
-}
+events.connect(events.LEXER_LOADED, function(lexer)
+  local rest = lexer == 'rest'
+  textadept.editing.auto_pairs[string.byte('`')] = rest and '`' or nil
+  textadept.editing.typeover_chars[string.byte('`')] = rest and 1 or nil
+end)
 
 -- Enable folding by the Sphinx convention for detected Sphinx files:
 -- # > * > = > - > ^ > ".
@@ -228,7 +227,7 @@ function M.goto_section()
     search_column = 2, string_output = true
   }
   if button ~= _L['_OK'] then return end
-  textadept.editing.goto_line(tonumber(i))
+  textadept.editing.goto_line(tonumber(i) - 1)
 end
 
 ---
