@@ -52,7 +52,7 @@ function M.goto_anchor()
   local e = buffer:word_end_position(buffer.current_pos)
   local anchor = buffer:text_range(s, e):match('^%*(.+)$')
   if anchor then
-    buffer:set_target_range(0, buffer.length)
+    buffer:target_whole_document()
     buffer.search_flags = buffer.FIND_WHOLEWORD
     if buffer:search_in_target('&'..anchor) >= 0 then
       buffer:goto_pos(buffer.target_start)

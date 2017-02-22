@@ -30,7 +30,7 @@ all: $(target)
 win32: lua.la $(target) ../libyamljit.dll
 osx: $(target)
 
-ta_src = /home/mitchell/code/textadept/src
+ta_src = $(HOME)/code/textadept/src
 
 $(yaml_objs): %.o: %.c
 	$(CROSS)$(CC) -c $(CFLAGS) -DHAVE_CONFIG_H -I. $< -o $@
