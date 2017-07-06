@@ -293,7 +293,7 @@ textadept.editing.autocompleters.css = function()
   local line, pos = buffer:get_cur_line()
   line = line:sub(1, pos)
   local symbol, op, part = line:match('([%w-]-)(:?:?)%s*([%w-]*)$')
-  if symbol == '' and part == '' and op ~= '' then return nil end -- lone :, ::
+  if symbol == '' and part == '' then return nil end -- nothing to complete
   local name = '^'..part
   local in_selector = line:find('{[^}]*$')
   local completions

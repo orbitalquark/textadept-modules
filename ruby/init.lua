@@ -59,7 +59,7 @@ textadept.editing.autocompleters.ruby = function()
   -- Retrieve the symbol behind the caret.
   local line, pos = buffer:get_cur_line()
   local symbol, op, part = line:sub(1, pos):match('([%w_%.]-)([%.:]*)([%w_]*)$')
-  if symbol == '' and part == '' and op ~= '' then return nil end -- lone ., ::
+  if symbol == '' and part == '' then return nil end -- nothing to complete
   if op ~= '' and op ~= '.' and op ~= '::' then return nil end
   -- Attempt to identify the symbol type.
   -- TODO: identify literals like "'foo'." and "[1, 2, 3].".
