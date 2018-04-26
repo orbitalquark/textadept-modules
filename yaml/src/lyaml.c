@@ -73,12 +73,6 @@ luaopen_yaml_libyaml64 (lua_State *L)
 }
 
 LUALIB_API int
-luaopen_yaml_libyamljit (lua_State *L)
-{
-  return luaopen_yaml_libyaml (L);
-}
-
-LUALIB_API int
 luaopen_yaml_libyamlosx (lua_State *L)
 {
   return luaopen_yaml_libyaml (L);

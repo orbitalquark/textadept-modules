@@ -25,9 +25,7 @@
 -- Andrew Danforth <acd@weirdness.net>
 
 local lib = "yaml.libyaml"
-if WIN32 then
-  if jit then lib = lib..'jit' end
-elseif OSX then
+if OSX then
   lib = lib..'osx'
 else
   local p = io.popen('uname -i')

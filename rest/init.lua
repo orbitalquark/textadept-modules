@@ -216,7 +216,7 @@ function M.goto_section()
   end
   local items = {}
   for i = 0, buffer.line_count - 2 do
-    if bit32.band(buffer.fold_level[i + 1], buffer.FOLDLEVELHEADERFLAG) > 0 then
+    if buffer.fold_level[i + 1] & buffer.FOLDLEVELHEADERFLAG > 0 then
       local name = buffer:get_line(i + 1):match('^.')..
                    buffer:get_line(i):match('^[^\r\n]*')
       if name then items[#items + 1], items[#items + 2] = i + 1, name end
