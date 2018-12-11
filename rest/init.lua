@@ -159,9 +159,11 @@ textadept.editing.api_files.rest = {
 
 -- Add '`' to autopaired and typeover characters.
 events.connect(events.LEXER_LOADED, function(lexer)
-  local rest = lexer == 'rest'
-  textadept.editing.auto_pairs[string.byte('`')] = rest and '`' or nil
-  textadept.editing.typeover_chars[string.byte('`')] = rest and 1 or nil
+  if textadept.editing.auto_pairs and textadept.editing.typeover_chars then
+    local rest = lexer == 'rest'
+    textadept.editing.auto_pairs[string.byte('`')] = rest and '`' or nil
+    textadept.editing.typeover_chars[string.byte('`')] = rest and 1 or nil
+  end
 end)
 
 -- Enable folding by the Sphinx convention for detected Sphinx files:
@@ -182,7 +184,7 @@ events.connect(events.FILE_AFTER_SAVE, function()
   buffer.annotation_visible = buffer.ANNOTATION_BOXED
   local jumped = false
   local filename = buffer.filename:iconv(_CHARSET, 'UTF-8')
-  spawn(cmd:format(filename), M.DOCUTILS_PATH, nil, function(chunk)
+  os.spawn(cmd:format(filename), M.DOCUTILS_PATH, nil, function(chunk)
     for line in chunk:gmatch('[^\r\n]+') do
       local line_num, msg = line:match('^[^:]+:(%d+):%s*(.+)$')
       if line_num and msg and
@@ -245,7 +247,7 @@ function M.open_image()
   elseif OSX then
     cmd = 'open "file://%s"'
   end
-  spawn(cmd:format(buffer.filename:match('^.+[/\\]')..file))
+  os.spawn(cmd:format(buffer.filename:match('^.+[/\\]')..file))
 end
 
 ---
