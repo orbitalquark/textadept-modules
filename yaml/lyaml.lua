@@ -29,7 +29,7 @@ if OSX then
   lib = lib..'osx'
 else
   local p = io.popen('uname -i')
-  if p:read('*a'):find('64') then lib = lib..'64' end
+  if p:read('a'):find('64') then lib = lib..'64' end
   p:close()
 end
 local yaml = require(lib)
