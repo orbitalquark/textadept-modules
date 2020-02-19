@@ -85,7 +85,8 @@ local SPELLING_ID = _SCINTILLA.next_user_list_type()
 local hunspell_paths = {
   '/usr/share/hunspell/', '/usr/local/share/hunspell/',
   'C:\\Program Files (x86)\\hunspell\\', 'C:\\Program Files\\hunspell\\',
-  _USERHOME..'/modules/spellcheck/' -- default
+  _HOME..'/modules/spellcheck/', -- default
+  _USERHOME..'/modules/spellcheck/'
 }
 local lang = (os.getenv('LANG') or ''):match('^[^.@]+') or 'en_US'
 local aff, dic = lang..'.aff', lang..'.dic'
