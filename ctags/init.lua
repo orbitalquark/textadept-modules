@@ -216,6 +216,7 @@ function M.goto_tag(tag)
                             buffer:line_from_position(buffer.current_pos),
                             buffer.column[buffer.current_pos])
   -- Jump to the tag.
+  if not lfs.attributes(tag[2]) then return end
   io.open_file(tag[2])
   if not tonumber(tag[3]) then
     for i = 0, buffer.line_count - 1 do
