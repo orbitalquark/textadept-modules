@@ -63,8 +63,9 @@ if _L['_Language Server']:find('^No Localization') then
   -- Error messages.
   _L['No project root found'] = 'No project root found'
   -- Dialogs.
+  _L['Goto definition'] = 'Goto definition'
   _L['Start Server...'] = 'Start Server...'
-  _L['language server already running'] = 'language server already running'
+  _L['language server is already running'] = 'language server is already running'
   _L['language server shell command:'] = 'language server shell command:'
   _L['Stop Server?'] = 'Stop Server?'
   _L['Stop the language server for'] = 'Stop the language server for'
@@ -706,7 +707,7 @@ local function goto_definition(kind)
           items[#items + 1] = tofilename(location[i].uri)
         end
         local i = ui.dialogs.filteredlist{
-          title = 'Goto Definition', columns = 'File', items = items
+          title = _L['Goto Definition'], columns = _L['Filename'], items = items
         }
         if i == -1 then return true end -- definition found; user cancelled
         location = location[i]
@@ -820,7 +821,7 @@ end)
 local m_tools = textadept.menu.menubar[_L['_Tools']]
 local found_area
 for i = 1, #m_tools - 1 do
-  if not found_area and m_tools[i + 1].title == _L['_Bookmark'] then
+  if not found_area and m_tools[i + 1].title == _L['_Bookmarks'] then
     found_area = true
   elseif found_area then
     local label = m_tools[i].title or m_tools[i][1]

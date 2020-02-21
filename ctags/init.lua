@@ -203,7 +203,9 @@ function M.goto_tag(tag)
     end
     local button, i = ui.dialogs.filteredlist{
       title = _L['Go To'],
-      columns = {_L['Name'], _L['File'], _L['Line:'], _L['Extra Information']},
+      columns = {
+        _L['Name'], _L['Filename'], _L['Line:'], _L['Extra Information']
+      },
       items = items, search_column = 2, width = CURSES and ui.size[1] - 2 or nil
     }
     if button < 1 then return end

@@ -56,7 +56,7 @@ local M = {}
 --   The marker for line modifications.
 -- @field INDIC_ADDITION (number)
 --   The indicator number for text added within lines.
--- @field INDIC_ADDITION (number)
+-- @field INDIC_DELETION (number)
 --   The indicator number for text deleted within lines.
 module('file_diff')]]
 
@@ -501,7 +501,7 @@ args.register('-d', '--diff', 2, M.start, 'Compares two files')
 local m_tools = textadept.menu.menubar[_L['_Tools']]
 local found_area
 for i = 1, #m_tools - 1 do
-  if not found_area and m_tools[i + 1].title == _L['_Bookmark'] then
+  if not found_area and m_tools[i + 1].title == _L['_Bookmarks'] then
     found_area = true
   elseif found_area then
     local label = m_tools[i].title or m_tools[i][1]

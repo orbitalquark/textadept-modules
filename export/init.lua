@@ -42,7 +42,7 @@ function M.to_html(filename, out_filename)
   filename = filename or buffer.filename or ''
   local dir, name = filename:match('^(.-[/\\]?)([^/\\]-)%.?[^.]*$')
   out_filename = out_filename or ui.dialogs.filesave{
-    title = _L['Save'], with_directory = dir,
+    title = _L['Save File'], with_directory = dir,
     with_file = (name..'.html'):iconv('UTF-8', _CHARSET),
     width = CURSES and ui.size[1] - 2 or nil
   }

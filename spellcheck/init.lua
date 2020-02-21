@@ -256,7 +256,7 @@ events.connect(events.BUFFER_NEW, set_properties)
 local m_tools = textadept.menu.menubar[_L['_Tools']]
 local found_area
 for i = 1, #m_tools - 1 do
-  if not found_area and m_tools[i + 1].title == _L['_Bookmark'] then
+  if not found_area and m_tools[i + 1].title == _L['_Bookmarks'] then
     found_area = true
   elseif found_area then
     local label = m_tools[i].title or m_tools[i][1]
