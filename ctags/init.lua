@@ -94,18 +94,18 @@ M.LUA_GENERATOR = 'LUA_GENERATOR'
 
 -- Localizations.
 local _L = _L
-if _L['_Ctags']:find('^No Localization') then
+if not rawget(_L, 'Ctags') then
   -- Dialogs.
   _L['Extra Information'] = 'Extra Information'
   _L['Goto Tag'] = 'Goto Tag'
   -- Menu.
-  _L['_Ctags'] = '_Ctags'
-  _L['_Goto Ctag'] = '_Goto Ctag'
-  _L['G_oto Ctag...'] = 'G_oto Ctag...'
-  _L['Jump _Back'] = 'Jump _Back'
-  _L['Jump _Forward'] = 'Jump _Forward'
-  _L['_Autocomplete Tag'] = '_Autocomplete Tag'
-  _L['Generate _Project Tags and API'] = 'Generate _Project Tags and API'
+  _L['Ctags'] = '_Ctags'
+  _L['Goto Ctag'] = '_Goto Ctag'
+  _L['Goto Ctag...'] = 'G_oto Ctag...'
+  _L['Jump Back'] = 'Jump _Back'
+  _L['Jump Forward'] = 'Jump _Forward'
+  _L['Autocomplete Tag'] = '_Autocomplete Tag'
+  _L['Generate Project Tags and API'] = 'Generate _Project Tags and API'
 end
 
 -- Searches all available tags files tag *tag* and returns a table of tags
@@ -248,22 +248,22 @@ textadept.editing.autocompleters.ctag = function()
 end
 
 -- Add menu entries and configure key bindings.
-local m_search = textadept.menu.menubar[_L['_Search']]
+local m_search = textadept.menu.menubar[_L['Search']]
 local SEPARATOR = {''}
 m_search[#m_search + 1] = SEPARATOR
 m_search[#m_search + 1] = {
-  title = _L['_Ctags'],
-  {_L['_Goto Ctag'], M.goto_tag},
-  {_L['G_oto Ctag...'], function()
+  title = _L['Ctags'],
+  {_L['Goto Ctag'], M.goto_tag},
+  {_L['Goto Ctag...'], function()
     local button, name = ui.dialogs.standard_inputbox{title = _L['Goto Tag']}
     if button == 1 then _M.ctags.goto_tag(name) end
   end},
   SEPARATOR,
-  {_L['_Autocomplete Tag'], function()
+  {_L['Autocomplete Tag'], function()
     textadept.editing.autocomplete('ctag')
   end},
   SEPARATOR,
-  {_L['Generate _Project Tags and API'], function()
+  {_L['Generate Project Tags and API'], function()
     local root_directory = io.get_project_root()
     if not root_directory then return end
     local ctags_flags = M.ctags_flags[root_directory]
@@ -300,6 +300,6 @@ m_search[#m_search + 1] = {
   end}
 }
 keys.f12 = M.goto_tag
-keys.sf12 = m_search[_L['_Ctags']][_L['G_oto Ctag...']][2]
+keys.sf12 = m_search[_L['Ctags']][_L['Goto Ctag...']][2]
 
 return M

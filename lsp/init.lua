@@ -59,12 +59,11 @@ local M = {}
 
 -- Localizations.
 local _L = _L
-if _L['_Language Server']:find('^No Localization') then
+if not rawget(_L, 'Language Server') then
   -- Error messages.
   _L['No project root found'] = 'No project root found'
   -- Dialogs.
   _L['Goto definition'] = 'Goto definition'
-  _L['Start Server...'] = 'Start Server...'
   _L['language server is already running'] = 'language server is already running'
   _L['language server shell command:'] = 'language server shell command:'
   _L['Stop Server?'] = 'Stop Server?'
@@ -74,18 +73,18 @@ if _L['_Language Server']:find('^No Localization') then
   -- Status.
   _L['Note: completion list incomplete'] = 'Note: completion list incomplete'
   -- Menu.
-  _L['_Language Server'] = '_Language Server'
-  _L['_Start Server...'] = '_Start Server...'
-  _L['Sto_p Server'] = 'Sto_p Server'
-  _L['Goto _Workspace Symbol...'] = 'Goto _Workspace Symbol...'
-  _L['Goto _Document Symbol...'] = 'Goto _Document Symbol...'
-  _L['_Autocomplete'] = '_Autocomplete'
-  _L['Show _Hover Information'] = 'Show _Hover Information'
-  _L['Show Si_gnature Help'] = 'Show Si_gnature Help'
-  _L['Goto _Definition'] = 'Goto _Definition'
-  _L['Goto _Type Definition'] = 'Goto _Type Definition'
-  _L['Goto _Implementation'] = 'Goto _Implementation'
-  _L['Find _References'] = 'Find _References'
+  _L['Language Server'] = '_Language Server'
+  _L['Start Server...'] = '_Start Server...'
+  _L['Stop Server'] = 'Sto_p Server'
+  _L['Goto Workspace Symbol...'] = 'Goto _Workspace Symbol...'
+  _L['Goto Document Symbol...'] = 'Goto _Document Symbol...'
+  _L['Autocomplete'] = '_Autocomplete'
+  _L['Show Hover Information'] = 'Show _Hover Information'
+  _L['Show Signature Help'] = 'Show Si_gnature Help'
+  _L['Goto Definition'] = 'Goto _Definition'
+  _L['Goto Type Definition'] = 'Goto _Type Definition'
+  _L['Goto Implementation'] = 'Goto _Implementation'
+  _L['Find References'] = 'Find _References'
 end
 
 events.LSP_INITIALIZED = 'lsp_initialized'
@@ -818,21 +817,21 @@ end)
 
 -- Add a menu.
 -- (Insert 'Language Server' menu in alphabetical order.)
-local m_tools = textadept.menu.menubar[_L['_Tools']]
+local m_tools = textadept.menu.menubar[_L['Tools']]
 local found_area
 for i = 1, #m_tools - 1 do
-  if not found_area and m_tools[i + 1].title == _L['_Bookmarks'] then
+  if not found_area and m_tools[i + 1].title == _L['Bookmarks'] then
     found_area = true
   elseif found_area then
     local label = m_tools[i].title or m_tools[i][1]
     if 'Language Server' < label:gsub('^_', '') or m_tools[i][1] == '' then
       table.insert(m_tools, i, {
-        title = _L['_Language Server'],
-        {_L['_Start Server...'], function()
+        title = _L['Language Server'],
+        {_L['Start Server...'], function()
           local server = servers[buffer:get_lexer()]
           if server then
             ui.dialogs.ok_msgbox{
-              title = _L['Start Server'],
+              title = _L['Start Server...']:gsub('_', ''),
               text = buffer:get_lexer()..' '..
                      _L['language server is already running'],
               no_cancel = true
@@ -840,14 +839,14 @@ for i = 1, #m_tools - 1 do
             return
           end
           local button, cmd = ui.dialogs.inputbox{
-            title = _L['Start Server...'],
+            title = _L['Start Server...']:gsub('_', ''),
             informative_text = buffer:get_lexer()..' '..
                                _L['language server shell command:'],
-            button1 = _L['_OK'], button2 = _L['_Cancel']
+            button1 = _L['OK'], button2 = _L['Cancel']
           }
           if button == 1 and cmd ~= '' then M.start(cmd) end
         end},
-        {_L['Sto_p Server'], function()
+        {_L['Stop Server'], function()
           local server = servers[buffer:get_lexer()]
           if not server then return end
           local button = ui.dialogs.ok_msgbox{
@@ -858,26 +857,26 @@ for i = 1, #m_tools - 1 do
           if button == 1 then M.stop() end
         end},
         {''},
-        {_L['Goto _Workspace Symbol...'], function()
+        {_L['Goto Workspace Symbol...'], function()
           local server = servers[buffer:get_lexer()]
           if not server then return end
           local button, query = ui.dialogs.inputbox{
             title = _L['Query Symbol...'],
             informative_text = _L['Symbol name or name part:'],
-            button1 = _L['_OK'], button2 = _L['_Cancel']
+            button1 = _L['OK'], button2 = _L['Cancel']
           }
           if button == 1 and query ~= '' then M.goto_symbol(query) end
         end},
-        {_L['Goto _Document Symbol...'], M.goto_symbol},
-        {_L['_Autocomplete'], function()
+        {_L['Goto Document Symbol...'], M.goto_symbol},
+        {_L['Autocomplete'], function()
           textadept.editing.autocomplete('lsp')
         end},
-        {_L['Show _Hover Information'], M.hover},
-        {_L['Show Si_gnature Help'], M.signature_help},
-        {_L['Goto _Definition'], M.goto_definition},
-        {_L['Goto _Type Definition'], M.goto_type_definition},
-        {_L['Goto _Implementation'], M.goto_implementation},
-        {_L['Find _References'], M.find_references},
+        {_L['Show Hover Information'], M.hover},
+        {_L['Show Signature Help'], M.signature_help},
+        {_L['Goto Definition'], M.goto_definition},
+        {_L['Goto Type Definition'], M.goto_type_definition},
+        {_L['Goto Implementation'], M.goto_implementation},
+        {_L['Find References'], M.find_references},
       })
       break
     end

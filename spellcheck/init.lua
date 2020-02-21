@@ -48,12 +48,12 @@ M.INDIC_SPELLING = _SCINTILLA.next_indic_number()
 
 -- Localizations.
 local _L = _L
-if _L['Spe_lling']:find('^No Localization') then
+if not rawget(_L, 'Spelling') then
   -- Menu.
-  _L['Spe_lling'] = 'Spe_lling'
-  _L['_Check Spelling...'] = '_Check Spelling...'
-  _L['_Mark Misspelled Words'] = '_Mark Misspelled Words'
-  _L['_Open User Dictionary'] = '_Open User Dictionary'
+  _L['Spelling'] = 'Spe_lling'
+  _L['Check Spelling...'] = '_Check Spelling...'
+  _L['Mark Misspelled Words'] = '_Mark Misspelled Words'
+  _L['Open User Dictionary'] = '_Open User Dictionary'
   -- Other.
   _L['No Suggestions'] = 'No Suggestions'
   _L['Add'] = 'Add'
@@ -253,20 +253,20 @@ events.connect(events.BUFFER_NEW, set_properties)
 
 -- Add menu entries and configure key bindings.
 -- (Insert 'Spelling' menu in alphabetical order.)
-local m_tools = textadept.menu.menubar[_L['_Tools']]
+local m_tools = textadept.menu.menubar[_L['Tools']]
 local found_area
 for i = 1, #m_tools - 1 do
-  if not found_area and m_tools[i + 1].title == _L['_Bookmarks'] then
+  if not found_area and m_tools[i + 1].title == _L['Bookmarks'] then
     found_area = true
   elseif found_area then
     local label = m_tools[i].title or m_tools[i][1]
     if 'Spelling' < label:gsub('^_', '') or m_tools[i][1] == '' then
       table.insert(m_tools, i, {
-        title = _L['Spe_lling'],
-        {_L['_Check Spelling...'], function() M.check_spelling(true) end},
-        {_L['_Mark Misspelled Words'], M.check_spelling},
+        title = _L['Spelling'],
+        {_L['Check Spelling...'], function() M.check_spelling(true) end},
+        {_L['Mark Misspelled Words'], M.check_spelling},
         {''},
-        {_L['_Open User Dictionary'], function()
+        {_L['Open User Dictionary'], function()
           if not lfs.attributes(user_dicts) then lfs.mkdir(user_dicts) end
           io.open_file(user_dicts..(not WIN32 and '/' or '\\')..'user.dic')
         end}
@@ -275,7 +275,7 @@ for i = 1, #m_tools - 1 do
     end
   end
 end
-keys.f7 = m_tools[_L['Spe_lling']][_L['_Check Spelling...']][2]
+keys.f7 = m_tools[_L['Spelling']][_L['Check Spelling...']][2]
 keys.sf7 = M.check_spelling
 
 return M

@@ -228,7 +228,7 @@ function M.goto_section()
     title = 'Goto Section', columns = {'Line', 'Name'}, items = items,
     search_column = 2, string_output = true
   }
-  if button ~= _L['_OK'] then return end
+  if button ~= _L['OK'] then return end
   textadept.editing.goto_line(tonumber(i) - 1)
 end
 

@@ -23,9 +23,9 @@ M.browser = 'firefox'
 M.line_numbers = true
 
 -- Localizations.
-if _L['E_xport']:find('^No Localization') then
-  _L['E_xport'] = 'E_xport'
-  _L['Export to _HTML...'] = 'Export to _HTML...'
+if not rawget(_L, 'Export') then
+  _L['Export'] = 'E_xport'
+  _L['Export to HTML...'] = 'Export to _HTML...'
 end
 
 ---
@@ -162,11 +162,11 @@ function M.to_html(filename, out_filename)
 end
 
 -- Add a sub-menu.
-local m_file = textadept.menu.menubar[_L['_File']]
+local m_file = textadept.menu.menubar[_L['File']]
 table.insert(m_file, #m_file - 1, {''}) -- separator
 table.insert(m_file, #m_file - 1, {
-  title = _L['E_xport'],
-  {_L['Export to _HTML...'], M.to_html}
+  title = _L['Export'],
+  {_L['Export to HTML...'], M.to_html}
 })
 
 return M

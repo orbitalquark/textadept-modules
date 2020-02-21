@@ -34,13 +34,13 @@ M.minimum_line_distance = 3
 M.maximum_history_size = 100
 
 -- Localizations.
-if _L['Histor_y']:find('^No Localization') then
+if not rawget(_L, 'History') then
   -- Menu.
-  _L['Histor_y'] = 'Histor_y'
-  _L['Navigate _Backward'] = 'Navigate _Backward'
-  _L['Navigate _Forward'] = 'Navigate _Forward'
-  _L['_Disable'] = '_Disable'
-  _L['_Enable'] = '_Enable'
+  _L['History'] = 'Histor_y'
+  _L['Navigate Backward'] = 'Navigate _Backward'
+  _L['Navigate Forward'] = 'Navigate _Forward'
+  _L['Disable'] = '_Disable'
+  _L['Enable'] = '_Enable'
 end
 
 -- Map of views to their history records.
@@ -171,14 +171,14 @@ end
 M.enable_listening()
 
 -- Add menu entries and configure key bindings.
-local m_edit = textadept.menu.menubar[_L['_Edit']]
+local m_edit = textadept.menu.menubar[_L['Edit']]
 m_edit[#m_edit + 1] = {
-  title = _L['Histor_y'],
-  {_L['Navigate _Backward'], M.back},
-  {_L['Navigate _Forward'], M.forward},
+  title = _L['History'],
+  {_L['Navigate Backward'], M.back},
+  {_L['Navigate Forward'], M.forward},
   {''},
-  {_L['_Disable'], M.disable_listening},
-  {_L['_Enable'], M.enable_listening},
+  {_L['Disable'], M.disable_listening},
+  {_L['Enable'], M.enable_listening},
 }
 keys[not CURSES and (not OSX and 'a,' or 'c,') or 'm,'] = M.back
 keys[not CURSES and (not OSX and 'a.' or 'c.') or 'm.'] = M.forward

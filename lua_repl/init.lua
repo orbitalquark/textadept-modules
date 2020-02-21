@@ -15,7 +15,7 @@ module('lua_repl')]]
 local M = {}
 
 -- Localizations.
-if _L['Lua REPL']:find('^No Localization') then
+if not rawget(_L, 'Lua REPL') then
   _L['Lua REPL'] = 'Lua REPL'
 end
 
@@ -174,8 +174,8 @@ M.keys = {
 }
 
 -- Add REPL to Tools menu.
-table.insert(textadept.menu.menubar[_L['_Tools']], {''})
-table.insert(textadept.menu.menubar[_L['_Tools']], {_L['Lua REPL'], function()
+table.insert(textadept.menu.menubar[_L['Tools']], {''})
+table.insert(textadept.menu.menubar[_L['Tools']], {_L['Lua REPL'], function()
   buffer.new()._type = '[Lua REPL]'
   buffer:set_lexer('lua')
   buffer:add_text('-- '.._L['Lua REPL'])

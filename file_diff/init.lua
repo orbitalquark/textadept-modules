@@ -77,22 +77,22 @@ local INDIC_DELETION = M.INDIC_DELETION
 
 -- Localizations.
 local _L = _L
-if _L['_Compare Files']:find('^No Localization') then
+if not rawget(_L, 'Compare Files') then
   -- Dialogs.
   _L['Select the first file to compare'] = 'Select the first file to compare'
   _L['Select the file to compare to'] = 'Select the file to compare to'
   -- Status.
   _L['No more differences'] = 'No more differences'
   -- Menu.
-  _L['_Compare Files'] = '_Compare Files'
-  _L['_Compare Files...'] = '_Compare Files...'
-  _L['Compare This File _With...'] = 'Compare This File _With...'
-  _L['Compare _Buffers'] = 'Compare _Buffers'
-  _L['_Next Change'] = '_Next Change'
-  _L['_Previous Change'] = '_Previous Change'
-  _L['Merge _Left'] = 'Merge _Left'
-  _L['Merge _Right'] = 'Merge _Right'
-  _L['_Stop Comparing'] = '_Stop Comparing'
+  _L['Compare Files'] = '_Compare Files'
+  _L['Compare Files...'] = '_Compare Files...'
+  _L['Compare This File With...'] = 'Compare This File _With...'
+  _L['Compare Buffers'] = 'Compare _Buffers'
+  _L['Next Change'] = '_Next Change'
+  _L['Previous Change'] = '_Previous Change'
+  _L['Merge Left'] = 'Merge _Left'
+  _L['Merge Right'] = 'Merge _Right'
+  _L['Stop Comparing'] = '_Stop Comparing'
 end
 
 local lib = 'file_diff.diff'
@@ -498,29 +498,29 @@ args.register('-d', '--diff', 2, M.start, 'Compares two files')
 
 -- Add a menu and configure key bindings.
 -- (Insert 'Compare Files' menu in alphabetical order.)
-local m_tools = textadept.menu.menubar[_L['_Tools']]
+local m_tools = textadept.menu.menubar[_L['Tools']]
 local found_area
 for i = 1, #m_tools - 1 do
-  if not found_area and m_tools[i + 1].title == _L['_Bookmarks'] then
+  if not found_area and m_tools[i + 1].title == _L['Bookmarks'] then
     found_area = true
   elseif found_area then
     local label = m_tools[i].title or m_tools[i][1]
     if 'Compare Files' < label:gsub('^_', '') or m_tools[i][1] == '' then
       table.insert(m_tools, i, {
-        title = _L['_Compare Files'],
-        {_L['_Compare Files...'], M.start},
-        {_L['Compare This File _With...'], function()
+        title = _L['Compare Files'],
+        {_L['Compare Files...'], M.start},
+        {_L['Compare This File With...'], function()
           if buffer.filename then M.start(buffer.filename) end
         end},
-        {_L['Compare _Buffers'], function() M.start('-', '-') end},
+        {_L['Compare Buffers'], function() M.start('-', '-') end},
         {''},
-        {_L['_Next Change'], function() M.goto_change(true) end},
-        {_L['_Previous Change'], M.goto_change},
+        {_L['Next Change'], function() M.goto_change(true) end},
+        {_L['Previous Change'], M.goto_change},
         {''},
-        {_L['Merge _Left'], function() M.merge(true) end},
-        {_L['Merge _Right'], M.merge},
+        {_L['Merge Left'], function() M.merge(true) end},
+        {_L['Merge Right'], M.merge},
         {''},
-        {_L['_Stop Comparing'], stop}
+        {_L['Stop Comparing'], stop}
       })
       break
     end
@@ -528,12 +528,12 @@ for i = 1, #m_tools - 1 do
 end
 local GUI = not CURSES
 keys.f6 = M.start
-keys.sf6 = m_tools[_L['_Compare Files']][_L['Compare _Buffers']][2]
+keys.sf6 = m_tools[_L['Compare Files']][_L['Compare Buffers']][2]
 keys[GUI and 'adown'
-         or 'mdown'] = m_tools[_L['_Compare Files']][_L['_Next Change']][2]
+         or 'mdown'] = m_tools[_L['Compare Files']][_L['Next Change']][2]
 keys[GUI and 'aup' or 'mup'] = M.goto_change
 keys[GUI and 'aleft'
-         or 'mleft'] = m_tools[_L['_Compare Files']][_L['Merge _Left']][2]
+         or 'mleft'] = m_tools[_L['Compare Files']][_L['Merge Left']][2]
 keys[GUI and 'aright' or 'mright'] = M.merge
 
 return M

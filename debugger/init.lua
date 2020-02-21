@@ -193,7 +193,7 @@ M.MARK_DEBUGLINE_COLOR = 0x6DD96D
 
 -- Localizations.
 local _L = _L
-if _L['Remove Breakpoint']:find('^No Localization') then
+if not rawget(_L, 'Remove Breakpoint') then
   -- Debugger messages.
   _L['Debugging'] = 'Debugging'
   _L['paused'] = 'paused'
@@ -213,28 +213,25 @@ if _L['Remove Breakpoint']:find('^No Localization') then
   _L['Debugger started'] = 'Debugger started'
   _L['Debugger stopped'] = 'Debugger stopped'
   _L['Variables'] = 'Variables'
-  _L['Name'] = 'Name'
   _L['Value'] = 'Value'
   _L['Call Stack'] = 'Call Stack'
-  _L['_OK'] = '_OK'
-  _L['_Set Frame'] = '_Set Frame'
+  _L['Set Frame'] = '_Set Frame'
   -- Menu.
-  _L['_Debug'] = '_Debug'
-  _L['Go/_Continue'] = 'Go/_Continue'
-  _L['Step _Over'] = 'Step _Over'
-  _L['Step _Into'] = 'Step _Into'
-  _L['Step Ou_t'] = 'Step Ou_t'
-  _L['Pause/_Break'] = 'Pause/_Break'
-  _L['_Restart'] = '_Restart'
-  _L['_Stop'] = 'Sto_p'
-  _L['I_nspect'] = 'I_nspect'
-  _L['_Variables...'] = '_Variables...'
-  _L['Call Stac_k...'] = 'Call Stac_k...'
-  _L['_Evaluate...'] = '_Evaluate...'
-  _L['_Toggle Breakpoint'] = 'Toggle _Breakpoint'
-  _L['Remo_ve Breakpoint...'] = 'Remo_ve Breakpoint...'
-  _L['Set _Watch Expression'] = 'Set _Watch Expression'
-  _L['Remove Watch E_xpression...'] = 'Remove Watch E_xpression...'
+  _L['Debug'] = '_Debug'
+  _L['Go/Continue'] = 'Go/_Continue'
+  _L['Step Over'] = 'Step _Over'
+  _L['Step Into'] = 'Step _Into'
+  _L['Step Out'] = 'Step O_ut'
+  _L['Pause/Break'] = 'Pause/_Break'
+  _L['Restart'] = '_Restart'
+  _L['Inspect'] = 'I_nspect'
+  _L['Variables...'] = '_Variables...'
+  _L['Call Stack...'] = 'Call Stac_k...'
+  _L['Evaluate...'] = '_Evaluate...'
+  _L['Toggle Breakpoint'] = 'Toggle _Breakpoint'
+  _L['Remove Breakpoint...'] = 'Remo_ve Breakpoint...'
+  _L['Set Watch Expression'] = 'Set _Watch Expression'
+  _L['Remove Watch Expression...'] = 'Remove Watch E_xpression...'
 end
 
 local MARK_BREAKPOINT = _SCINTILLA.next_marker_number()
@@ -324,7 +321,7 @@ function M.remove_breakpoint(file, line)
       title = _L['Remove Breakpoint'], columns = _L['Breakpoint:'],
       items = items, string_output = true, select_multiple = true
     }
-    if button ~= _L['_OK'] or not breakpoints then return end
+    if button ~= _L['OK'] or not breakpoints then return end
     for i = 1, #breakpoints do
       file, line = breakpoints[i]:match('^(.+):(%d+)$')
       M.remove_breakpoint(file, tonumber(line))
@@ -427,7 +424,7 @@ function M.remove_watch(id)
       title = _L['Remove Watch'], columns = _L['Expression:'], items = items,
       string_output = true
     }
-    if button ~= _L['_OK'] or not expr then return end
+    if button ~= _L['OK'] or not expr then return end
     id = watches[lexer][expr] -- TODO: handle duplicates
   end
   local watch_exprs = watches[lexer]
@@ -641,8 +638,8 @@ function M.set_frame()
   local call_stack = states[lexer].call_stack
   local button, level = ui.dialogs.dropdown{
     title = _L['Call Stack'], items = call_stack,
-    select = call_stack.pos or 1, button1 = _L['_OK'],
-    button2 = _L['_Set Frame']
+    select = call_stack.pos or 1, button1 = _L['OK'],
+    button2 = _L['Set Frame']
   }
   if button ~= 2 then return end
   events.emit(events.DEBUGGER_SET_FRAME, lexer, tonumber(level))
@@ -697,21 +694,21 @@ events.connect(events.DWELL_END, buffer.call_tip_cancel)
 -- (Insert 'Debug' menu after 'Tools'.)
 local menubar = textadept.menu.menubar
 for i = 1, #menubar do
-  if menubar[i].title == _L['_Tools'] then
+  if menubar[i].title == _L['Tools'] then
     table.insert(menubar, i + 1, {
-      title = _L['_Debug'],
-      {_L['Go/_Continue'], M.continue},
-      {_L['Step _Over'], M.step_over},
-      {_L['Step _Into'], M.step_into},
-      {_L['Step Ou_t'], M.step_out},
-      {_L['Pause/_Break'], M.pause},
-      {_L['_Restart'], M.restart},
-      {_L['_Stop'], M.stop},
+      title = _L['Debug'],
+      {_L['Go/Continue'], M.continue},
+      {_L['Step Over'], M.step_over},
+      {_L['Step Into'], M.step_into},
+      {_L['Step Out'], M.step_out},
+      {_L['Pause/Break'], M.pause},
+      {_L['Restart'], M.restart},
+      {_L['Stop'], M.stop},
       {''},
-      {_L['I_nspect'], M.inspect},
-      {_L['_Variables...'], M.variables},
-      {_L['Call Stac_k...'], M.set_frame},
-      {_L['_Evaluate...'], function()
+      {_L['Inspect'], M.inspect},
+      {_L['Variables...'], M.variables},
+      {_L['Call Stack...'], M.set_frame},
+      {_L['Evaluate...'], function()
         -- TODO: command entry loses focus when run from select command
         -- dialog. This works fine when run from menu directly.
         local lexer = buffer:get_lexer()
@@ -721,10 +718,10 @@ for i = 1, #menubar do
         end, 'lua')
       end},
       {''},
-      {_L['_Toggle Breakpoint'], M.toggle_breakpoint},
-      {_L['Remo_ve Breakpoint...'], M.remove_breakpoint},
-      {_L['Set _Watch Expression'], M.set_watch},
-      {_L['Remove Watch E_xpression...'], M.remove_watch},
+      {_L['Toggle Breakpoint'], M.toggle_breakpoint},
+      {_L['Remove Breakpoint...'], M.remove_breakpoint},
+      {_L['Set Watch Expression'], M.set_watch},
+      {_L['Remove Watch Expression...'], M.remove_watch},
     })
     break
   end
@@ -735,8 +732,8 @@ keys.f11 = M.step_into
 keys.sf11 = M.step_out
 keys.sf5 = M.stop
 keys[not OSX and not CURSES and 'a=' or 'm='] = M.inspect
-local m_debug = textadept.menu.menubar[_L['_Debug']]
-keys[not OSX and not CURSES and 'a+' or 'm+'] = m_debug[_L['_Evaluate...']][2]
+local m_debug = textadept.menu.menubar[_L['Debug']]
+keys[not OSX and not CURSES and 'a+' or 'm+'] = m_debug[_L['Evaluate...']][2]
 keys.f9 = M.toggle_breakpoint
 
 -- Automatically load a language debugger when a file of that language is
