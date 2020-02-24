@@ -56,7 +56,7 @@ events.connect(events.RESET_AFTER, function()
 end)
 
 -- Listens for text insertion and deletion events and records their locations.
-local function record_edit_location(modification_type, position, length)
+local function record_edit_location(position, modification_type, text, length)
   local buffer = buffer
   -- Only interested in text insertion or deletion.
   if modification_type & buffer.MOD_INSERTTEXT > 0 then
