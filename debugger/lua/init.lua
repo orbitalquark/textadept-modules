@@ -18,8 +18,7 @@ if LINUX then
   -- LuaSocket may be in an arch-specific directory. Ideally, check arch and use
   -- a single path, but it's easier to use both and assume one or the other.
   package.cpath = table.concat({
-    package.cpath,
-    '/usr/lib/x86_64-linux-gnu/lua/5.3/?.so',
+    package.cpath, '/usr/lib/x86_64-linux-gnu/lua/5.3/?.so',
     '/usr/lib/i386-linux-gnu/lua/5.3/?.so'
   }, ';')
 end
@@ -83,8 +82,8 @@ function handle_continuation(action)
     local call_stack = {}
     for i = 1, #stack do
       local frame = stack[i][1]
-      call_stack[#call_stack + 1] = ('(%s) %s:%d'):format(frame[1] or frame[5],
-                                                          frame[7], frame[4])
+      call_stack[#call_stack + 1] = string.format(
+        '(%s) %s:%d', frame[1] or frame[5], frame[7], frame[4])
     end
     call_stack.pos = 1
     -- Fetch variables (index 2) and upvalues (index 3) from the current frame.
@@ -113,15 +112,16 @@ events.connect(events.DEBUGGER_START, function(lexer, filename, args, timeout)
   end
   if filename ~= '-' then
     local arg = {
-      string.format([[-e 'package.path = package.path..";%s;%s"']],
-                    _HOME..'/modules/debugger/lua/?.lua',
-                    _USERHOME..'/modules/debugger/lua/?.lua'),
+      string.format(
+        [[-e 'package.path = package.path .. ";%s;%s"']],
+        _HOME .. '/modules/debugger/lua/?.lua',
+        _USERHOME .. '/modules/debugger/lua/?.lua'),
       [[-e 'require("mobdebug").start()']],
-      string.format('"%s"', filename),
+      string.format('%q', filename),
       args
     }
-    local cmd = textadept.run.run_commands.lua:gsub('([\'"]?)%%f%1',
-                                                    table.concat(arg, ' '))
+    local cmd = textadept.run.run_commands.lua:gsub(
+      '([\'"]?)%%f%1', table.concat(arg, ' '))
     proc = assert(os.spawn(cmd, filename:match('^.+[/\\]'), ui.print, ui.print))
   end
   client = assert(server:accept(), 'failed to establish debug connection')
@@ -161,16 +161,16 @@ end)
 
 -- Add and remove breakpoints and watches.
 events.connect(events.DEBUGGER_BREAKPOINT_ADDED, function(lexer, file, line)
-  if lexer == 'lua' then handle('setb '..file..' '..line) end
+  if lexer == 'lua' then handle(string.format('setb %s %d', file, line)) end
 end)
 events.connect(events.DEBUGGER_BREAKPOINT_REMOVED, function(lexer, file, line)
-  if lexer == 'lua' then handle('delb '..file..' '..line) end
+  if lexer == 'lua' then handle(string.format('delb %s %d', file, line)) end
 end)
 events.connect(events.DEBUGGER_WATCH_ADDED, function(lexer, expr, id)
-  if lexer == 'lua' then handle('setw '..expr) end
+  if lexer == 'lua' then handle('setw ' .. expr) end
 end)
 events.connect(events.DEBUGGER_WATCH_REMOVED, function(lexer, expr, id)
-  if lexer == 'lua' then handle('delw '..id) end
+  if lexer == 'lua' then handle('delw ' .. id) end
 end)
 
 -- Set the current stack frame.
@@ -183,19 +183,19 @@ end)
 -- Inspect the value of a symbol/variable at a given position.
 events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
   if lexer ~= 'lua' then return end
-  if buffer.style_name[buffer.style_at[pos]] ~= 'identifier' then return end
+  if buffer:name_of_style(buffer.style_at[pos]) ~= 'identifier' then return end
   local s = buffer:position_from_line(buffer:line_from_position(pos))
   local e = buffer:word_end_position(pos, true)
   local line_part = buffer:text_range(s, e)
   local symbol = line_part:match('[%w_%.]+$')
-  handle('eval '..symbol, function(value)
-    buffer:call_tip_show(pos, symbol..' = '..tostring(value))
+  handle('eval ' .. symbol, function(value)
+    buffer:call_tip_show(pos, string.format('%s = %s', symbol, value))
   end)
 end)
 
 -- Evaluate an arbitrary expression.
 events.connect(events.DEBUGGER_COMMAND, function(lexer, text)
-  if lexer == 'lua' then handle('exec '..text) end
+  if lexer == 'lua' then handle('exec ' .. text) end
 end)
 
 return M

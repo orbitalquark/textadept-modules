@@ -255,8 +255,9 @@ local states = {}
 -- Notifies via the statusbar that debugging is happening.
 local function update_statusbar()
   local lexer = buffer:get_lexer()
-  local status = states[lexer] and
-                 _L[states[lexer].executing and 'executing' or 'paused'] or '?'
+  local status =
+    states[lexer] and _L[states[lexer].executing and 'executing' or 'paused'] or
+    '?'
   ui.statusbar_text = string.format('%s (%s)', _L['Debugging'], status)
 end
 
@@ -312,7 +313,7 @@ function M.remove_breakpoint(file, line)
     for filename, file_breakpoints in pairs(breakpoints[lexer]) do
       if not file or file == filename then
         for line in pairs(file_breakpoints) do
-          items[#items + 1] = filename..':'..line
+          items[#items + 1] = string.format('%s:%d', filename, line)
         end
       end
     end
@@ -591,11 +592,13 @@ end
 -- @name update_state
 function M.update_state(state)
   assert(type(state) == 'table', 'state must be a table')
-  assert(state.file and state.line and state.call_stack,
-         'state must have file, line, and call_stack fields')
-  assert(type(state.call_stack) == 'table' and
-         type(state.call_stack.pos) == 'number',
-         'state.call_stack must be a table with a numeric pos field')
+  assert(
+    state.file and state.line and state.call_stack,
+    'state must have file, line, and call_stack fields')
+  assert(
+    type(state.call_stack) == 'table' and
+    type(state.call_stack.pos) == 'number',
+    'state.call_stack must be a table with a numeric pos field')
   if not state.variables then state.variables = {} end
   local file = state.file:iconv('UTF-8', _CHARSET)
   if state.file ~= buffer.filename then ui.goto_file(file) end
@@ -615,8 +618,7 @@ function M.variables()
   for k in pairs(states[lexer].variables) do names[#names + 1] = k end
   table.sort(names)
   local variables = {}
-  for i = 1, #names do
-    local name = names[i]
+  for _, name in ipairs(names) do
     variables[#variables + 1] = name
     variables[#variables + 1] = states[lexer].variables[name]
   end
@@ -739,8 +741,8 @@ keys.f9 = M.toggle_breakpoint
 -- Automatically load a language debugger when a file of that language is
 -- opened.
 events.connect(events.LEXER_LOADED, function(lexer)
-  if package.searchpath('debugger.'..lexer, package.path) then
-    require('debugger.'..lexer)
+  if package.searchpath('debugger.' .. lexer, package.path) then
+    require('debugger.' .. lexer)
   end
 end)
 

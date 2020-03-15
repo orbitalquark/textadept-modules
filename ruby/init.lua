@@ -30,7 +30,7 @@ end)
 -- a constant and 'a' as an attribute.
 -- @class table
 -- @name tags
-M.tags = {_HOME..'/modules/ruby/tags', _USERHOME..'/modules/ruby/tags'}
+M.tags = {_HOME .. '/modules/ruby/tags', _USERHOME .. '/modules/ruby/tags'}
 
 ---
 -- Map of expression patterns to their types.
@@ -63,8 +63,7 @@ textadept.editing.autocompleters.ruby = function()
   if op ~= '' and op ~= '.' and op ~= '::' then return nil end
   -- Attempt to identify the symbol type.
   -- TODO: identify literals like "'foo'." and "[1, 2, 3].".
-  local buffer = buffer
-  local assignment = '%f[%w_]'..symbol:gsub('(%p)', '%%%1')..'%s*=%s*(.*)$'
+  local assignment = '%f[%w_]' .. symbol:gsub('(%p)', '%%%1') .. '%s*=%s*(.*)$'
   for i = buffer:line_from_position(buffer.current_pos) - 1, 0, -1 do
     local expr = buffer:get_line(i):match(assignment)
     if expr then
@@ -78,29 +77,29 @@ textadept.editing.autocompleters.ruby = function()
     end
   end
   -- Search through ctags for completions for that symbol.
-  local name_patt = '^'..part
-  local symbol_patt = '%f[%w]'..symbol..'%f[^%w_]'
+  local name_patt = '^' .. part
+  local symbol_patt = '%f[%w]' .. symbol .. '%f[^%w_]'
   local sep = string.char(buffer.auto_c_type_separator)
-  for i = 1, #M.tags do
-    if lfs.attributes(M.tags[i]) then
-      for line in io.lines(M.tags[i]) do
-        local name = line:match('^%S+')
-        if name:find(name_patt) and not list[name] then
-          local fields = line:match(';"\t(.*)$')
-          local k, class = fields:sub(1, 1), fields:match('class:(%S+)') or ''
-          if class:find(symbol_patt) and (op ~= ':' or k == 'f') then
-            list[#list + 1] = ("%s%s%d"):format(name, sep, xpms[k])
-            list[name] = true
-          end
+  for _, filename in ipairs(M.tags) do
+    if not lfs.attributes(filename) then goto continue end
+    for line in io.lines(filename) do
+      local name = line:match('^%S+')
+      if name:find(name_patt) and not list[name] then
+        local fields = line:match(';"\t(.*)$')
+        local k, class = fields:sub(1, 1), fields:match('class:(%S+)') or ''
+        if class:find(symbol_patt) and (op ~= ':' or k == 'f') then
+          list[#list + 1] = name .. sep .. xpms[k]
+          list[name] = true
         end
       end
     end
+    ::continue::
   end
   return #part, list
 end
 
 textadept.editing.api_files.ruby = {
-  _HOME..'/modules/ruby/api', _USERHOME..'/modules/ruby/api'
+  _HOME .. '/modules/ruby/api', _USERHOME .. '/modules/ruby/api'
 }
 
 -- Commands.
@@ -158,7 +157,6 @@ local newlines = {[0] = '\r\n', '\r', '\n'}
 -- must be on lines with the same level of indentation to toggle correctly.
 -- @name toggle_block
 function M.toggle_block()
-  local buffer = buffer
   local pos = buffer.current_pos
   local line = buffer:line_from_position(pos)
   local e = buffer.line_end_position[line]
@@ -169,7 +167,7 @@ function M.toggle_block()
   local p = pos
   while p < e do
     if char_at[p] == 125 then -- '}'
-      local s = buffer:brace_match(p)
+      local s = buffer:brace_match(p, 0)
       if s >= 0 then
         local block = buffer:text_range(s + 1, p)
         local hash = false
@@ -177,14 +175,14 @@ function M.toggle_block()
         if not s2 and not e2 then s2, e2 = #block, #block end
         local part1, part2 = block:sub(1, s2), block:sub(e2 + 1)
         hash = part1:find('=>') or part1:find('[%w_]:') or
-               part2:find('=>') or part2:find('[%w_]:')
+          part2:find('=>') or part2:find('[%w_]:')
         if not hash then
           local newline = newlines[buffer.eol_mode]
-          local block, r = block:gsub('^(%s*|[^|]*|)', '%1'..newline)
+          local block, r = block:gsub('^(%s*|[^|]*|)', '%1' .. newline)
           if r == 0 then block = newline..block end
           buffer:begin_undo_action()
           buffer:set_target_range(s, p + 1)
-          buffer:replace_target('do'..block..newline..'end')
+          buffer:replace_target(string.format('do%s%send', block, newline))
           local indent = line_indentation[line]
           line_indentation[line + 1] = indent + buffer.tab_width
           line_indentation[line + 2] = indent
@@ -213,8 +211,9 @@ function M.toggle_block()
   if s < 0 then return end -- no block start found
   local indent = line_indentation[s]
   e = s + 1
-  while e < buffer.line_count and (not buffer:get_line(e):find(end_patt) or
-                                   line_indentation[e] ~= indent) do
+  while e < buffer.line_count and
+        (not buffer:get_line(e):find(end_patt) or
+          line_indentation[e] ~= indent) do
     e = e + 1
   end
   if e >= buffer.line_count then return end -- no block end found
@@ -226,7 +225,7 @@ function M.toggle_block()
   block = block:gsub('[\r\n]+', ' '):gsub(' +', ' ')
   buffer:begin_undo_action()
   buffer:set_target_range(s2, e2)
-  buffer:replace_target('{'..block..'}')
+  buffer:replace_target(string.format('{%s}', block))
   buffer:end_undo_action()
 end
 

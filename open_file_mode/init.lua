@@ -33,10 +33,11 @@ function ui.command_entry.open_file()
   ui.command_entry.run(function(file)
     if file ~= '' and not file:find('^%a?:?[/\\]') then
       -- Convert relative path into an absolute one.
-      file = (buffer.filename or lfs.currentdir()..'/'):match('^.+[/\\]')..file
+      file = (buffer.filename or lfs.currentdir() .. '/'):match('^.+[/\\]') ..
+        file
     end
     if WIN32 then file = win32_normalize(file) end
-    io.open_file(file ~= '' and file)
+    io.open_file(file ~= '' and file or nil)
   end, {
     ['\t'] = function()
       if ui.command_entry:auto_c_active() then return end
@@ -45,15 +46,15 @@ function ui.command_entry.open_file()
       local path = ui.command_entry:get_text()
       if not path:find('^%a?:?[/\\]') then
         -- Convert relative path into an absolute one.
-        path = (buffer.filename or
-                lfs.currentdir()..'/'):match('^.+[/\\]')..path
+        path = (buffer.filename or lfs.currentdir() .. '/'):match('^.+[/\\]') ..
+          path
       end
       if WIN32 then path = win32_normalize(path) end
       local dir, part = path:match('^(.-)\\?([^/\\]*)$')
-      if WIN32 and dir:find('^%a:$') then dir = dir..'\\' end -- C: --> C:\
+      if WIN32 and dir:find('^%a:$') then dir = dir .. '\\' end -- C: --> C:\
       if lfs.attributes(dir, 'mode') == 'directory' then
         -- Iterate over directory, finding file matches.
-        local patt = '^'..part:gsub('(%p)', '%%%1')
+        local patt = '^' .. part:gsub('(%p)', '%%%1')
         lfs.dir_foreach(dir, function(file)
           file = file:match('[^/\\]+[/\\]?$')
           if file:find(patt) then files[#files + 1] = file end

@@ -54,7 +54,7 @@ function M.goto_anchor()
   if anchor then
     buffer:target_whole_document()
     buffer.search_flags = buffer.FIND_WHOLEWORD
-    if buffer:search_in_target('&'..anchor) >= 0 then
+    if buffer:search_in_target('&' .. anchor) >= 0 then
       buffer:goto_pos(buffer.target_start)
     end
   end
@@ -75,9 +75,7 @@ if type(snippets) == 'table' then
 -- Container for YAML-specific snippets.
 -- @class table
 -- @name _G.snippets.yaml
-  snippets.yaml = {
-
-  }
+  snippets.yaml = {}
 end
 
 return M

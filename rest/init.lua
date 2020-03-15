@@ -40,7 +40,7 @@ local dirs = {
   'title', 'topic', 'unicode', 'warning',
 }
 for i = 1, #dirs do
-  dirs[i] = ("%s::%s%d"):format(dirs[i], sep, XPM.METHOD)
+  dirs[i] = ('%s::%s%d'):format(dirs[i], sep, XPM.METHOD)
 end
 
 local sphinx_dirs = {
@@ -50,7 +50,7 @@ local sphinx_dirs = {
   'versionchanged', 'warning',
 }
 for i = 1, #sphinx_dirs do
-  dirs[#dirs + 1] = ("%s::%s%d"):format(sphinx_dirs[i], sep, XPM.SLOT)
+  dirs[#dirs + 1] = ('%s::%s%d'):format(sphinx_dirs[i], sep, XPM.SLOT)
 end
 
 local options = {
@@ -86,7 +86,7 @@ local options = {
 }
 for _, v in pairs(options) do
   v[#v + 1], v[#v + 2] = 'name', 'class' -- global options
-  for i = 1, #v do v[i] = ("%s:%s%d"):format(v[i], sep, XPM.VARIABLE) end
+  for i = 1, #v do v[i] = ('%s::%s%d'):format(v[i], sep, XPM.VARIABLE) end
 end
 
 local roles = {
@@ -95,7 +95,7 @@ local roles = {
   'title-reference', 'title', 't', 'raw'
 }
 for i = 1, #roles do
-  roles[i] = ("%s:%s%d"):format(roles[i], sep, XPM.METHOD)
+  roles[i] = ('%s:%s%d'):format(roles[i], sep, XPM.METHOD)
 end
 
 local sphinx_roles = {
@@ -105,7 +105,7 @@ local sphinx_roles = {
   'samp', 'index', 'pep', 'rfc'
 }
 for i = 1, #sphinx_roles do
-  roles[#roles + 1] = ("%s:%s%d"):format(sphinx_roles[i], sep, XPM.SLOT)
+  roles[#roles + 1] = ('%s:%s%d'):format(sphinx_roles[i], sep, XPM.SLOT)
 end
 
 textadept.editing.autocompleters.rest = function()
@@ -114,13 +114,13 @@ textadept.editing.autocompleters.rest = function()
   local line, pos = buffer:get_cur_line()
   local line_part = line:sub(1, pos)
   local part = line_part:match('[%w-]*$')
-  local name = '^'..part
+  local name = '^' .. part
   -- Determine whether or not the symbol is a directive, parameter, or role, and
   -- autocomplete as appropriate.
   if line_part:find('^%s*%.%. [%w-]*$') then
     -- Autocomplete directive.
-    for i = 1, #dirs do
-      if dirs[i]:find(name) then list[#list + 1] = dirs[i] end
+    for _, dir in ipairs(dirs) do
+      if dir:find(name) then list[#list + 1] = dir end
     end
   elseif line_part:find('^%s*:[%w-]*$') then
     -- Autocomplete parameter or role.
@@ -129,30 +129,30 @@ textadept.editing.autocompleters.rest = function()
       local dir_options = options[line:match('^%s*%.%. ([%w-]+)::[ \r\n]')]
       if dir_options then
         -- Autocomplete parameter.
-        for i = 1, #dir_options do
-          if dir_options[i]:find(name) then list[#list + 1] = dir_options[i] end
+        for _, option in ipairs(dir_options) do
+          if option:find(name) then list[#list + 1] = option end
         end
         break
       end
       if not line:find('^%s*:') then
         -- Autocomplete role.
-        for i = 1, #roles do
-          if roles[i]:find(name) then list[#list + 1] = roles[i] end
+        for _, role in ipairs(roles) do
+          if role:find(name) then list[#list + 1] = role end
         end
         break
       end
     end
   elseif line_part:find('%s+:[%w-]*$') then
     -- Autocomplete role.
-    for i = 1, #roles do
-      if roles[i]:find(name) then list[#list + 1] = roles[i] end
+    for _, role in ipairs(roles) do
+      if role:find(name) then list[#list + 1] = role end
     end
   end
   return #part, list
 end
 
 textadept.editing.api_files.rest = {
-  _HOME..'/modules/rest/api', _USERHOME..'/modules/rest/api'
+  _HOME .. '/modules/rest/api', _USERHOME .. '/modules/rest/api'
 }
 
 -- Commands.
@@ -175,8 +175,8 @@ events.connect(events.LEXER_LOADED, function(lexer)
   end
 end)
 
-local cmd = 'python "'.._HOME..'/modules/rest/rst2pseudoxml.py" '..
-            '--report=2 --halt=5 "%s"'
+local cmd = 'python "' .. _HOME .. '/modules/rest/rst2pseudoxml.py" ' ..
+  '--report=2 --halt=5 "%s"'
 -- Show syntax errors as annotations.
 events.connect(events.FILE_AFTER_SAVE, function()
   if buffer:get_lexer() ~= 'rest' then return end
@@ -192,8 +192,8 @@ events.connect(events.FILE_AFTER_SAVE, function()
         if msg:find('Unknown interpreted text role') then
           -- Ignore role errors when it comes to Sphinx roles.
           -- TODO: determine if the document is Sphinx or not?
-          for i = 1, #sphinx_roles do
-            if msg:find('"'..sphinx_roles[i]..'"') then goto continue end
+          for _, role in ipairs(sphinx_roles) do
+            if msg:find(string.format('"%s"', role)) then goto continue end
           end
         end
         buffer.annotation_text[line_num - 1] = msg
@@ -219,8 +219,8 @@ function M.goto_section()
   local items = {}
   for i = 0, buffer.line_count - 2 do
     if buffer.fold_level[i + 1] & buffer.FOLDLEVELHEADERFLAG > 0 then
-      local name = buffer:get_line(i + 1):match('^.')..
-                   buffer:get_line(i):match('^[^\r\n]*')
+      local name = buffer:get_line(i + 1):match('^.') ..
+        buffer:get_line(i):match('^[^\r\n]*')
       if name then items[#items + 1], items[#items + 2] = i + 1, name end
     end
   end
@@ -239,7 +239,7 @@ end
 function M.open_image()
   local line = buffer:get_cur_line()
   local file = line:match('^%s*%.%. image::%s+(%S+)') or
-               line:match('^%s*%.%. figure::%s+(%S+)')
+    line:match('^%s*%.%. figure::%s+(%S+)')
   if not file or not buffer.filename then return end
   local cmd = 'xdg-open "%s"'
   if WIN32 then
@@ -247,7 +247,7 @@ function M.open_image()
   elseif OSX then
     cmd = 'open "file://%s"'
   end
-  os.spawn(cmd:format(buffer.filename:match('^.+[/\\]')..file))
+  os.spawn(cmd:format(buffer.filename:match('^.+[/\\]') .. file))
 end
 
 ---

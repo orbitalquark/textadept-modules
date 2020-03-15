@@ -18,7 +18,7 @@ end)
 
 -- Autocompletion and documentation.
 
-local completion = '%s'..string.char(buffer.auto_c_type_separator)..'%d'
+local completion = '%s' .. string.char(buffer.auto_c_type_separator) .. '%d'
 local XPM = textadept.editing.XPM_IMAGES
 
 -- List of selectors available for autocompletion.
@@ -266,20 +266,20 @@ local inherit = completion:format('inherit', XPM.VARIABLE)
 -- Define some properties in terms of others.
 values.background = {}
 for _, kind in ipairs{'attachment', 'color', 'image', 'position', 'repeat'} do
-  values.background[#values.background + 1] = values['background-'..kind]
+  values.background[#values.background + 1] = values['background-' .. kind]
 end
 values.border = {
   values['border-color'], values['border-style'], values['border-width']
 }
 for _, direction in ipairs{'bottom', 'left', 'right', 'top'} do
-  values['border-'..direction] = values.border
-  values['border-'..direction..'-color'] = values['border-color']
-  values['border-'..direction..'-style'] = values['border-style']
-  values['border-'..direction..'-width'] = values['border-width']
+  values['border-' .. direction] = values.border
+  values['border-' .. direction .. '-color'] = values['border-color']
+  values['border-' .. direction .. '-style'] = values['border-style']
+  values['border-' .. direction .. '-width'] = values['border-width']
 end
 values['cue-after'], values['cue-before'] = values.cue, values.cue
 for _, kind in ipairs{'family', 'size', 'style', 'variant', 'weight'} do
-  values.font[#values.font + 1] = values['font-'..kind]
+  values.font[#values.font + 1] = values['font-' .. kind]
 end
 values.outline = {
   values['outline-color'], values['outline-style'], values['outline-width']
@@ -294,7 +294,7 @@ textadept.editing.autocompleters.css = function()
   line = line:sub(1, pos)
   local symbol, op, part = line:match('([%w-]-)(:?:?)%s*([%w-]*)$')
   if symbol == '' and part == '' then return nil end -- nothing to complete
-  local name = '^'..part
+  local name = '^' .. part
   local in_selector = line:find('{[^}]*$')
   local completions
   if not line:find('@media[^{]*$') then
@@ -329,13 +329,12 @@ textadept.editing.autocompleters.css = function()
     completions = medias -- autocomplete media type
   end
   -- Extract potential completions.
-  for i = 1, #completions do
-    local completion = completions[i]
+  for _, completion in ipairs(completions) do
     if type(completion) == 'string' then
       if completion:find(name) then list[#list + 1] = completion end
     else
-      for j = 1, #completion do
-        if completion[j]:find(name) then list[#list + 1] = completion[j] end
+      for _, completion in ipairs(completion) do
+        if completion:find(name) then list[#list + 1] = completion end
       end
     end
   end
@@ -348,7 +347,7 @@ textadept.editing.autocompleters.css = function()
 end
 
 textadept.editing.api_files.css = {
-  _HOME..'/modules/css/api', _USERHOME..'/modules/css/api'
+  _HOME .. '/modules/css/api', _USERHOME .. '/modules/css/api'
 }
 
 -- Commands.
@@ -366,9 +365,7 @@ if type(snippets) == 'table' then
 -- Container for CSS-specific snippets.
 -- @class table
 -- @name _G.snippets.css
-  snippets.css = {
-
-  }
+  snippets.css = {}
 end
 
 return M

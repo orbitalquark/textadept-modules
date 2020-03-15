@@ -97,10 +97,10 @@ end
 
 local lib = 'file_diff.diff'
 if OSX then
-  lib = lib..'osx'
+  lib = lib .. 'osx'
 elseif not WIN32 then
   local p = io.popen('uname -i')
-  if p:read('*a'):find('64') then lib = lib..'64' end
+  if p:read('*a'):find('64') then lib = lib .. '64' end
   p:close()
 end
 local diff = require(lib)
@@ -185,7 +185,8 @@ local function mark_changes()
         if line < 0 then line = 0 end
         if line == 0 and buffer2.annotation_text[line] ~= '' then
           -- Add to existing empty space under the first line in buffer2.
-          blanks = buffer2.annotation_text[line]..'\n'..blanks
+          blanks = string.format(
+            '%s\n%s', buffer2.annotation_text[line], blanks)
         end
         buffer2.annotation_text[line] = blanks
       end
@@ -217,7 +218,8 @@ local function mark_changes()
         if line < 0 then line = 0 end
         if line == 0 and buffer1.annotation_text[line] ~= '' then
           -- Add to existing empty space under the first line in buffer1.
-          blanks = buffer1.annotation_text[line]..'\n'..blanks
+          blanks = string.format(
+            '%s\n%s', buffer1.annotation_text[line], blanks)
         end
         buffer1.annotation_text[line] = blanks
       end
@@ -225,8 +227,8 @@ local function mark_changes()
       pos1, pos2 = pos1 + text_len, pos2 + text_len
     end
     --text = text:gsub('\n', '\\n')
-    --if #text > 70 then text = text:sub(1, 30)..' ... '..text:sub(-30) end
-    --print(op, '"'..text..'"')
+    --if #text > 70 then text = text:sub(1, 30) .. ' ... ' .. text:sub(-30) end
+    --print(op, '"' .. text .. '"')
   end
   --for i = 0, buffer.line_count do print(buffer:marker_get(i)) end
   synchronize()
@@ -249,12 +251,13 @@ function M.start(file1, file2, horizontal)
   file1 = file1 or ui.dialogs.fileselect{
     title = _L['Select the first file to compare'],
     with_directory = (buffer.filename or ''):match('^.+[/\\]') or
-                     lfs.currentdir(),
+      lfs.currentdir(),
     width = CURSES and ui.size[1] - 2 or nil
   }
   if not file1 then return end
   file2 = file2 or ui.dialogs.fileselect{
-    title = _L['Select the file to compare to']..' '..file1:match('[^/\\]+$'),
+    title = string.format(
+      '%s %s', _L['Select the file to compare to'], file1:match('[^/\\]+$')),
     with_directory = file1:match('^.+[/\\]') or lfs.currentdir(),
     width = CURSES and ui.size[1] - 2 or nil
   }
@@ -285,8 +288,9 @@ local function stop()
 end
 
 -- Stop comparing when one of the buffer's being compared is switched or closed.
-events.connect(events.BUFFER_BEFORE_SWITCH,
-               function() if not starting_diff then stop() end end)
+events.connect(events.BUFFER_BEFORE_SWITCH, function()
+  if not starting_diff then stop() end
+end)
 events.connect(events.BUFFER_DELETED, stop)
 
 -- Retrieves the equivalent of line number *line* in the other buffer.
@@ -325,16 +329,16 @@ function M.goto_change(next)
   -- single change.
   local buffer1, buffer2 = view1.buffer, view2.buffer
   local diff_marker = 1 << MARK_ADDITION | 1 << MARK_DELETION |
-                      1 << MARK_MODIFICATION
+    1 << MARK_MODIFICATION
   local f = next and buffer.marker_next or buffer.marker_previous
   line1 = f(buffer1, line1, diff_marker)
   while line1 >= 0 and buffer1:marker_get(line1) & diff_marker ==
-                       buffer1:marker_get(line1 - step) & diff_marker do
+        buffer1:marker_get(line1 - step) & diff_marker do
     line1 = f(buffer1, line1 + step, diff_marker)
   end
   line2 = f(buffer2, line2, diff_marker)
   while line2 >= 0 and buffer2:marker_get(line2) & diff_marker ==
-                       buffer2:marker_get(line2 - step) & diff_marker do
+        buffer2:marker_get(line2 - step) & diff_marker do
     line2 = f(buffer2, line2 + step, diff_marker)
   end
   if line1 < 0 and line2 < 0 then
@@ -355,9 +359,10 @@ function M.goto_change(next)
       local visible_line = buffer:visible_from_doc_line(line2)
       ui.goto_view(view1)
       local line2_1 = buffer:doc_line_from_visible(visible_line)
-      buffer:goto_line(line1 >= 0 and
-                       (next and line1 < line2_1 or
-                        not next and line1 > line2_1) and line1 or line2_1)
+      buffer:goto_line(
+        line1 >= 0 and
+        (next and line1 < line2_1 or not next and line1 > line2_1) and line1 or
+        line2_1)
     else
       buffer:goto_line(line1)
     end
@@ -367,9 +372,10 @@ function M.goto_change(next)
       local visible_line = buffer:visible_from_doc_line(line1)
       ui.goto_view(view2)
       local line1_2 = buffer:doc_line_from_visible(visible_line)
-      buffer:goto_line(line2 >= 0 and
-                       (next and line2 < line1_2 or
-                        not next and line2 > line1_2) and line2 or line1_2)
+      buffer:goto_line(
+        line2 >= 0 and
+        (next and line2 < line1_2 or not next and line2 > line1_2) and line2 or
+        line1_2)
     else
       buffer:goto_line(line2)
     end
@@ -389,7 +395,7 @@ function M.merge(left)
   local line_start = buffer:line_from_position(buffer.current_pos)
   local line_end = line_start + 1
   local diff_marker = 1 << MARK_ADDITION | 1 << MARK_DELETION |
-                      1 << MARK_MODIFICATION
+    1 << MARK_MODIFICATION
   local marker = buffer:marker_get(line_start) & diff_marker
   if marker == 0 then
     -- Look for additions or deletions from the other buffer, which are offset
@@ -460,8 +466,9 @@ end
 local synchronizing = false
 events.connect(events.UPDATE_UI, function(updated)
   if _VIEWS[view1] and _VIEWS[view2] and updated and not synchronizing then
-    if updated & (buffer.UPDATE_H_SCROLL | buffer.UPDATE_V_SCROLL |
-                  buffer.UPDATE_SELECTION) > 0 then
+    if updated &
+       (buffer.UPDATE_H_SCROLL | buffer.UPDATE_V_SCROLL |
+         buffer.UPDATE_SELECTION) > 0 then
       synchronizing = true
       synchronize()
       synchronizing = false
@@ -477,19 +484,19 @@ end)
 
 events.connect(events.VIEW_NEW, function()
   local markers = {
-    [MARK_ADDITION] = M.theme..'_green', [MARK_DELETION] = M.theme..'_red',
-    [MARK_MODIFICATION] = M.theme..'_yellow'
+    [MARK_ADDITION] = M.theme .. '_green', [MARK_DELETION] = M.theme .. '_red',
+    [MARK_MODIFICATION] = M.theme .. '_yellow'
   }
   for mark, color in pairs(markers) do
     buffer:marker_define(mark, buffer.MARK_BACKGROUND)
-    buffer.marker_back[mark] = buffer.property_int['color.'..color]
+    buffer.marker_back[mark] = buffer.property_int['color.' .. color]
   end
   local indicators = {
-    [INDIC_ADDITION] = M.theme..'_green', [INDIC_DELETION] = M.theme..'_red'
+    [INDIC_ADDITION] = M.theme .. '_green', [INDIC_DELETION] = M.theme .. '_red'
   }
   for indic, color in pairs(indicators) do
     buffer.indic_style[indic] = buffer.INDIC_FULLBOX
-    buffer.indic_fore[indic] = buffer.property_int['color.'..color]
+    buffer.indic_fore[indic] = buffer.property_int['color.' .. color]
     buffer.indic_alpha[indic], buffer.indic_under[indic] = 255, true
   end
 end)
@@ -529,11 +536,11 @@ end
 local GUI = not CURSES
 keys.f6 = M.start
 keys.sf6 = m_tools[_L['Compare Files']][_L['Compare Buffers']][2]
-keys[GUI and 'adown'
-         or 'mdown'] = m_tools[_L['Compare Files']][_L['Next Change']][2]
+keys[GUI and 'adown' or 'mdown'] =
+  m_tools[_L['Compare Files']][_L['Next Change']][2]
 keys[GUI and 'aup' or 'mup'] = M.goto_change
-keys[GUI and 'aleft'
-         or 'mleft'] = m_tools[_L['Compare Files']][_L['Merge Left']][2]
+keys[GUI and 'aleft' or 'mleft'] =
+  m_tools[_L['Compare Files']][_L['Merge Left']][2]
 keys[GUI and 'aright' or 'mright'] = M.merge
 
 return M

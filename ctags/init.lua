@@ -117,20 +117,21 @@ end
 local function find_tags(tag)
   -- TODO: binary search?
   local tags = {}
-  local patt = '^('..tag..'%S*)\t([^\t]+)\t(.-);"\t?(.*)$'
+  local patt = '^(' .. tag .. '%S*)\t([^\t]+)\t(.-);"\t?(.*)$'
   -- Determine the tag files to search in.
   local tag_files = {}
   local function add_tag_file(file)
     for i = 1, #tag_files do if tag_files[i] == file then return end end
     tag_files[#tag_files + 1] = file
   end
-  local tag_file = ((buffer.filename or ''):match('^.+[/\\]') or
-                    lfs.currentdir()..'/')..'tags' -- current directory's tags
+  local tag_file =
+    ((buffer.filename or ''):match('^.+[/\\]') or lfs.currentdir() .. '/') ..
+    'tags' -- current directory's tags
   if lfs.attributes(tag_file) then add_tag_file(tag_file) end
   if buffer.filename then
     local root = io.get_project_root(buffer.filename)
     if root then
-      tag_file = root..'/tags' -- project's tags
+      tag_file = root .. '/tags' -- project's tags
       if lfs.attributes(tag_file) then add_tag_file(tag_file) end
       tag_file = M[root] -- project's specified tags
       if type(tag_file) == 'string' then
@@ -144,14 +145,14 @@ local function find_tags(tag)
   -- Search all tags files for matches.
   local tmpfile
   ::retry::
-  for i = 1, #tag_files do
-    local dir, found = tag_files[i]:match('^.+[/\\]'), false
-    local f = io.open(tag_files[i])
+  for _, filename in ipairs(tag_files) do
+    local dir, found = filename:match('^.+[/\\]'), false
+    local f = io.open(filename)
     if not f then goto continue end
     for line in f:lines() do
       local tag, file, ex_cmd, ext_fields = line:match(patt)
       if tag then
-        if not file:find('^%a?:?[/\\]') then file = dir..file end
+        if not file:find('^%a?:?[/\\]') then file = dir .. file end
         if ex_cmd:find('^/') then ex_cmd = ex_cmd:match('^/^?(.-)$?/$') end
         tags[#tags + 1] = {tag, file:gsub('\\\\', '\\'), ex_cmd, ext_fields}
         found = true
@@ -165,9 +166,9 @@ local function find_tags(tag)
   if #tags == 0 and buffer.filename and not tmpfile then
     -- If no matches were found, try the current file.
     tmpfile = os.tmpname()
-    if WIN32 then tmpfile = os.getenv('TEMP')..tmpfile end
-    local cmd = string.format('%s -o "%s" "%s"', M.ctags, tmpfile,
-                              buffer.filename)
+    if WIN32 then tmpfile = os.getenv('TEMP') .. tmpfile end
+    local cmd = string.format(
+      '%s -o "%s" "%s"', M.ctags, tmpfile, buffer.filename)
     os.spawn(cmd):wait()
     tag_files = {tmpfile}
     goto retry
@@ -195,11 +196,11 @@ function M.goto_tag(tag)
   -- pick the only one.
   if #tags > 1 then
     local items = {}
-    for i = 1, #tags do
-      items[#items + 1] = tags[i][1]
-      items[#items + 1] = tags[i][2]:match('[^/\\]+$') -- filename only
-      items[#items + 1] = tags[i][3]:match('^%s*(.+)$') -- strip indentation
-      items[#items + 1] = tags[i][4]:match('^%a?%s*(.*)$') -- ignore kind
+    for _, tag in ipairs(tags) do
+      items[#items + 1] = tag[1]
+      items[#items + 1] = tag[2]:match('[^/\\]+$') -- filename only
+      items[#items + 1] = tag[3]:match('^%s*(.+)$') -- strip indentation
+      items[#items + 1] = tag[4]:match('^%a?%s*(.*)$') -- ignore kind
     end
     local button, i = ui.dialogs.filteredlist{
       title = _L['Go To'],
@@ -214,9 +215,9 @@ function M.goto_tag(tag)
     tag = tags[1]
   end
   -- Store the current position in the jump history, if applicable.
-  require('history').append(buffer.filename,
-                            buffer:line_from_position(buffer.current_pos),
-                            buffer.column[buffer.current_pos])
+  require('history').append(
+    buffer.filename, buffer:line_from_position(buffer.current_pos),
+    buffer.column[buffer.current_pos])
   -- Jump to the tag.
   if not lfs.attributes(tag[2]) then return end
   io.open_file(tag[2])
@@ -231,9 +232,9 @@ function M.goto_tag(tag)
     textadept.editing.goto_line(tonumber(tag[3]) - 1)
   end
   -- Store the new position in the jump history.
-  require('history').append(buffer.filename,
-                            buffer:line_from_position(buffer.current_pos),
-                            buffer.column[buffer.current_pos])
+  require('history').append(
+    buffer.filename, buffer:line_from_position(buffer.current_pos),
+    buffer.column[buffer.current_pos])
 end
 
 -- Autocompleter function for ctags.
@@ -271,12 +272,13 @@ m_search[#m_search + 1] = {
     local api_command = M.api_commands[root_directory]
     if type(api_command) == 'function' then api_command = api_command() end
     if ctags_flags == M.LUA_GENERATOR or api_command == M.LUA_GENERATOR then
-      os.spawn('luadoc -d . --doclet tadoc .', root_directory,
-               {'LUA_PATH='.._HOME..'/modules/lua/?.lua;;'}):wait()
+      os.spawn(
+        'luadoc -d . --doclet tadoc .', root_directory,
+        {string.format('LUA_PATH=%s/modules/lua/?.lua;;', _HOME)}):wait()
     end
     if ctags_flags ~= M.LUA_GENERATOR then
-      os.spawn(string.format('"%s" %s', M.ctags, ctags_flags or '-R'),
-               root_directory):wait()
+      os.spawn(string.format(
+        '"%s" %s', M.ctags, ctags_flags or '-R'), root_directory):wait()
     end
     if api_command then
       if api_command ~= M.LUA_GENERATOR then
@@ -284,8 +286,8 @@ m_search[#m_search + 1] = {
       end
     elseif M.generate_default_api then
       -- Generate from ctags file.
-      local f = assert(io.open(root_directory..'/api', 'wb'))
-      for line in io.lines(root_directory..'/tags') do
+      local f = assert(io.open(root_directory .. '/api', 'wb'))
+      for line in io.lines(root_directory .. '/tags') do
         local patt = '^(%S*)\t([^\t]+)\t(.-);"\t?(.*)$'
         local tag, file, ex_cmd = line:match(patt)
         if tag then

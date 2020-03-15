@@ -21,7 +21,7 @@ end)
 
 -- Autocompletion and documentation.
 
-local completion = '%s'..string.char(buffer.auto_c_type_separator)..'%d'
+local completion = '%s' .. string.char(buffer.auto_c_type_separator) .. '%d'
 local XPM = textadept.editing.XPM_IMAGES
 
 -- List of HTML tags available for autocompletion.
@@ -256,9 +256,9 @@ local attributes = {
   video = {attr.core, attr.lang, event.key, event.mouse},
 }
 for _, attrs in pairs(attributes) do
-  for i = 1, #attrs do
-    if type(attrs[i]) == 'string' then
-      attrs[i] = completion:format(attrs[i], XPM.METHOD)
+  for i, attr in ipairs(attrs) do
+    if type(attr) == 'string' then
+      attrs[i] = completion:format(attr, XPM.METHOD)
     end
   end
 end
@@ -273,9 +273,9 @@ textadept.editing.autocompleters.html = function()
   if line:find('<([%w:]*)$') then
     -- Autocomplete tag.
     local part = line:match('<([%w:]*)$')
-    local name = '^'..part
-    for i = 1, #tags do
-      if tags[i]:find(name) then list[#list + 1] = tags[i] end
+    local name = '^' .. part
+    for _, tag in ipairs(tags) do
+      if tag:find(name) then list[#list + 1] = tag end
     end
     return #part, list
   else
@@ -292,15 +292,14 @@ textadept.editing.autocompleters.html = function()
       if not symbol then return nil end
       part = line:match('([%w:]*)$')
     end
-    local name, attrs = '^'..part, attributes[symbol]
+    local name, attrs = '^' .. part, attributes[symbol]
     if attrs then
-      for i = 1, #attrs do
-        local attr = attrs[i]
+      for _, attr in ipairs(attrs) do
         if type(attr) == 'string' then
           if attr:find(name) then list[#list + 1] = attr end
         else
-          for j = 1, #attr do
-            if attr[j]:find(name) then list[#list + 1] = attr[j] end
+          for _, attr in ipairs(attr) do
+            if attr:find(name) then list[#list + 1] = attr end
           end
         end
       end
@@ -310,7 +309,7 @@ textadept.editing.autocompleters.html = function()
 end
 
 textadept.editing.api_files.html = {
-  _HOME..'/modules/html/api', _USERHOME..'/modules/html/api'
+  _HOME .. '/modules/html/api', _USERHOME .. '/modules/html/api'
 }
 
 -- Commands.

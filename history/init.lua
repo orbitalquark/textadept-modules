@@ -72,8 +72,9 @@ local function record_edit_location(position, modification_type, text, length)
      (buffer.PERFORMED_UNDO | buffer.PERFORMED_REDO) > 0 then
     return
   end
-  M.append(buffer.filename or buffer._type or _L['Untitled'],
-           buffer:line_from_position(position), buffer.column[position])
+  M.append(
+    buffer.filename or buffer._type or _L['Untitled'],
+    buffer:line_from_position(position), buffer.column[position])
 end
 
 ---
@@ -99,8 +100,7 @@ local function goto_record()
   if lfs.attributes(record[1]) then
     io.open_file(record[1])
   else
-    for i = 1, #_BUFFERS do
-      local buffer = _BUFFERS[i]
+    for _, buffer in ipairs(_BUFFERS) do
       if buffer.filename == record[1] or buffer._type == record[1] or
          not buffer.filename and not buffer._type and
          record[1] == _L['Untitled'] then

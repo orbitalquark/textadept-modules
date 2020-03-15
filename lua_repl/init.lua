@@ -28,8 +28,8 @@ local env = setmetatable({
     buffer:add_text('--> ')
     local args = table.pack(...)
     for i = 1, args.n do
-    buffer:add_text(tostring(args[i]))
-    if i < args.n then buffer:add_text('\t') end
+      buffer:add_text(tostring(args[i]))
+      if i < args.n then buffer:add_text('\t') end
     end
     buffer:new_line()
   end
@@ -65,7 +65,7 @@ function M.evaluate_repl()
     last_line = buffer:line_from_position(buffer.current_pos)
   end
 
-  local f, result = load('return '..code, 'repl', 't', env)
+  local f, result = load('return ' .. code, 'repl', 't', env)
   if not f then f, result = load(code, 'repl', 't', env) end
   if not f and s == e then return false end -- multi-line chunk; propagate key
   buffer:goto_pos(buffer.line_end_position[last_line])
@@ -77,13 +77,14 @@ function M.evaluate_repl()
       -- Pretty-print tables like ui.command_entry does.
       local items = {}
       for k, v in pairs(result) do
-        items[#items + 1] = tostring(k)..' = '..tostring(v)
+        items[#items + 1] = string.format('%s = %s', k, v)
       end
       table.sort(items)
-      result = '{'..table.concat(items, ', ')..'}'
+      result = string.format('{%s}', table.concat(items, ', '))
       if buffer.edge_column > 0 and #result > buffer.edge_column then
         local indent = string.rep(' ', buffer.tab_width)
-        result = '{\n'..indent..table.concat(items, ',\n'..indent)..'\n}'
+        result = string.format(
+          '{\n%s%s\n}', indent, table.concat(items, ',\n' .. indent))
       end
     end
     buffer:add_text(tostring(result):gsub('(\r?\n)', '%1--> '))
@@ -100,21 +101,22 @@ end
 function M.complete_lua()
   local line, pos = buffer:get_cur_line()
   local symbol, op, part = line:sub(1, pos):match('([%w_.]-)([%.:]?)([%w_]*)$')
-  local ok, result = pcall((load('return ('..symbol..')', nil, 't', env)))
+  local ok, result = pcall(
+    (load(string.format('return (%s)', symbol), nil, 't', env)))
   if (not ok or type(result) ~= 'table') and symbol ~= '' then return end
   local cmpls = {}
-  part = '^'..part
+  part = '^' .. part
   if not ok or symbol == 'buffer' then
-    local pool = not ok and {_G} or
-                 (op == ':' and {_SCINTILLA.functions} or
-                  {_SCINTILLA.properties, _SCINTILLA.constants})
-    for i = 1, #pool do
-      for k in pairs(pool[i]) do
+    local sci = _SCINTILLA
+    local global_envs =
+      not ok and {_G} or
+      (op == ':' and {sci.functions} or {sci.properties, sci.constants})
+    for i = 1, #global_envs do
+      for k in pairs(global_envs[i]) do
         if type(k) == 'string' and k:find(part) then cmpls[#cmpls + 1] = k end
       end
     end
-  end
-  if ok then
+  else
     for k, v in pairs(result) do
       if type(k) == 'string' and k:find(part) and
          (op == '.' or type(v) == 'function') then
@@ -123,7 +125,8 @@ function M.complete_lua()
     end
   end
   table.sort(cmpls)
-  buffer:auto_c_show(#part - 1, table.concat(cmpls, ' '))
+  buffer:auto_c_show(
+    #part - 1, table.concat(cmpls, string.char(buffer.auto_c_separator)))
 end
 
 ---
@@ -178,7 +181,7 @@ table.insert(textadept.menu.menubar[_L['Tools']], {''})
 table.insert(textadept.menu.menubar[_L['Tools']], {_L['Lua REPL'], function()
   buffer.new()._type = '[Lua REPL]'
   buffer:set_lexer('lua')
-  buffer:add_text('-- '.._L['Lua REPL'])
+  buffer:add_text('-- ' .. _L['Lua REPL'])
   buffer:new_line()
   buffer:set_save_point()
   -- Cannot initially define keys in `keys.lua` because that table does not

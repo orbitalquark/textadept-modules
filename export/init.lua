@@ -42,8 +42,7 @@ function M.to_html(filename, out_filename)
   filename = filename or buffer.filename or ''
   local dir, name = filename:match('^(.-[/\\]?)([^/\\]-)%.?[^.]*$')
   out_filename = out_filename or ui.dialogs.filesave{
-    title = _L['Save File'], with_directory = dir,
-    with_file = (name..'.html'):iconv('UTF-8', _CHARSET),
+    title = _L['Save File'], with_directory = dir, with_file = name .. '.html',
     width = CURSES and ui.size[1] - 2 or nil
   }
   if not out_filename then return end
@@ -53,18 +52,17 @@ function M.to_html(filename, out_filename)
 
   local html = {}
   html[#html + 1] = '<html><head><meta charset="utf-8"/>'
-  html[#html + 1] = format('<title>%s</title>',
-                           filename:iconv('UTF-8', _CHARSET) or _L['Untitled'])
+  html[#html + 1] = format(
+    '<title>%s</title>', filename:iconv('UTF-8', _CHARSET) or _L['Untitled'])
 
   -- Iterate over defined styles and convert them into CSS.
   html[#html + 1] = '<style type="text/css">'
-  local style_name = buffer.style_name
   for i = 0, 255 do
-    local name = style_name[i]
+    local name = buffer:name_of_style(i)
     if name == 'Not Available' then goto continue end
     local style = {}
     -- Determine style properties.
-    local style_def = buffer.property_expanded['style.'..name]
+    local style_def = buffer.property_expanded['style.' .. name]
     style_def = style_def:gsub('%%(%b())', function(prop)
       return buffer.property_expanded[prop:sub(2, -2)]
     end)
@@ -73,10 +71,10 @@ function M.to_html(filename, out_filename)
     local back_color = style_def:match('back:([^,]+)')
     -- TODO: inheritance like "...,bold,notbold,..."
     local bold = style_def:find('bold') and not style_def:find('notbold')
-    local italic = style_def:find('italics') and
-                   not style_def:find('notitalics')
-    local underline = style_def:find('underlined') and
-                      not style_def:find('notunderlined')
+    local italic =
+      style_def:find('italics') and not style_def:find('notitalics')
+    local underline =
+      style_def:find('underlined') and not style_def:find('notunderlined')
     -- Convert style properties to CSS.
     style[#style + 1] = name == 'default' and '* {' or format('.%s {', name)
     if name == 'default' then style[#style + 1] = 'font-family: Monospace;' end
@@ -108,8 +106,9 @@ function M.to_html(filename, out_filename)
   local line_num = 1
   local line_num_fmt = format('%%%dd', #tostring(buffer.line_count))
   if M.line_numbers then
-    html[#html + 1] = format('<span class="linenumber">%s&nbsp;</span>',
-                             format(line_num_fmt, line_num):gsub(' ', '&nbsp;'))
+    html[#html + 1] = format(
+      '<span class="linenumber">%s&nbsp;</span>',
+      format(line_num_fmt, line_num):gsub(' ', '&nbsp;'))
     line_num = line_num + 1
   end
 
@@ -127,8 +126,9 @@ function M.to_html(filename, out_filename)
     }):gsub('\n', function()
       local suffix = ''
       if M.line_numbers then
-        suffix = format('<span class="linenumber">%s&nbsp;</span>',
-                        format(line_num_fmt, line_num):gsub(' ', '&nbsp;'))
+        suffix = format(
+          '<span class="linenumber">%s&nbsp;</span>',
+          format(line_num_fmt, line_num):gsub(' ', '&nbsp;'))
         line_num = line_num + 1
       end
       return format('\n<br/>%s', suffix)
@@ -142,7 +142,7 @@ function M.to_html(filename, out_filename)
       if prev_pos then
         html[#html + 1] = format_span(text_range(buffer, prev_pos, pos))
       end
-      html[#html + 1] = format('<span class="%s">', style_name[style])
+      html[#html + 1] = format('<span class="%s">', buffer:name_of_style(style))
       prev_pos, prev_style = pos, style
     end
     pos = position_after(buffer, pos)
@@ -155,9 +155,7 @@ function M.to_html(filename, out_filename)
   html[#html + 1] = '</body></html>'
 
   -- Done. Export to the file and show it.
-  local f = io.open(out_filename, 'wb')
-  f:write(table.concat(html))
-  f:close()
+  io.open(out_filename, 'wb'):write(table.concat(html)):close()
   os.spawn(format('%s "%s"', M.browser, out_filename))
 end
 

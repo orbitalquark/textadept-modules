@@ -63,10 +63,10 @@ end
 
 local lib = 'spellcheck.spell'
 if OSX then
-  lib = lib..'osx'
+  lib = lib .. 'osx'
 elseif not WIN32 then
   local p = io.popen('uname -i')
-  if p:read('*a'):find('64') then lib = lib..'64' end
+  if p:read('*a'):find('64') then lib = lib .. '64' end
   p:close()
 end
 M.spell = require(lib)
@@ -85,23 +85,23 @@ local SPELLING_ID = _SCINTILLA.next_user_list_type()
 local hunspell_paths = {
   '/usr/share/hunspell/', '/usr/local/share/hunspell/',
   'C:\\Program Files (x86)\\hunspell\\', 'C:\\Program Files\\hunspell\\',
-  _HOME..'/modules/spellcheck/', -- default
-  _USERHOME..'/modules/spellcheck/'
+  _HOME .. '/modules/spellcheck/', -- default
+  _USERHOME .. '/modules/spellcheck/'
 }
 local lang = (os.getenv('LANG') or ''):match('^[^.@]+') or 'en_US'
-local aff, dic = lang..'.aff', lang..'.dic'
-for i = 1, #hunspell_paths do
-  local aff_path, dic_path = hunspell_paths[i]..aff, hunspell_paths[i]..dic
+local aff, dic = lang .. '.aff', lang .. '.dic'
+for _, path in ipairs(hunspell_paths) do
+  local aff_path, dic_path = path .. aff, path .. dic
   if lfs.attributes(aff_path) and lfs.attributes(dic_path) then
     M.spellchecker = M.spell(aff_path, dic_path)
     break
   end
 end
-local user_dicts = _USERHOME..(not WIN32 and '/' or '\\')..'dictionaries'
+local user_dicts = _USERHOME .. (not WIN32 and '/' or '\\') .. 'dictionaries'
 if lfs.attributes(user_dicts) then
   for dic in lfs.dir(user_dicts) do
     if not dic:find('^%.%.?$') then
-      M.spellchecker:add_dic(user_dicts..(not WIN32 and '/' or '\\')..dic)
+      M.spellchecker:add_dic(user_dicts .. (not WIN32 and '/' or '\\') .. dic)
     end
   end
 end
@@ -110,9 +110,11 @@ end
 -- @param word The word to show suggestions for.
 local function show_suggestions(word)
   local suggestions = M.spellchecker:suggest(word)
-  if #suggestions == 0 then suggestions[1] = '('.._L['No Suggestions']..')' end
-  suggestions[#suggestions + 1] = '('.._L['Add']..')'
-  suggestions[#suggestions + 1] = '('.._L['Ignore']..')'
+  if #suggestions == 0 then
+    suggestions[1] = string.format('(%s)', _L['No Suggestions'])
+  end
+  suggestions[#suggestions + 1] = string.format('(%s)', _L['Add'])
+  suggestions[#suggestions + 1] = string.format('(%s)', _L['Ignore'])
   local separator = buffer.auto_c_separator
   buffer.auto_c_separator = string.byte('\n')
   buffer:user_list_show(SPELLING_ID, table.concat(suggestions, '\n'))
@@ -131,14 +133,14 @@ events.connect(events.USER_LIST_SELECTION, function(id, text, position)
   else
     if text:find(_L['Add']) then
       if not lfs.attributes(user_dicts) then lfs.mkdir(user_dicts) end
+      local user_dict = user_dicts .. '/user.dic'
       local words = {}
-      local f = io.open(user_dicts..'/user.dic', 'rb')
-      if f then for word in f:lines() do words[#words + 1] = word end end
+      if lfs.attributes(user_dict) then
+        for word in io.lines(user_dict) do words[#words + 1] = word end
+      end
       words[1] = tonumber(words[1] or 0) + 1
       words[#words + 1] = buffer:text_range(s, e)
-      f = io.open(user_dicts..'/user.dic', 'wb')
-      f:write(table.concat(words, '\n'))
-      f:close()
+      io.open(user_dict, 'wb'):write(table.concat(words, '\n')):close()
     end
     M.spellchecker:add_word(buffer:text_range(s, e))
     M.check_spelling()
@@ -150,12 +152,12 @@ local word_patt = {
   lpeg.Cp() * lpeg.C(lpeg.V('word')) * lpeg.Cp() + lpeg.V('skip') * lpeg.V(1),
   word_char = lpeg.R('AZ', 'az', '09', '\127\255') + '_',
   word_part = lpeg.R('az', '\127\255')^1 * -lpeg.V('word_char') +
-              lpeg.R('AZ') * lpeg.R('az', '\127\255')^0 * -lpeg.V('word_char') +
-              lpeg.R('AZ', '\127\255')^1 * -lpeg.V('word_char'),
+    lpeg.R('AZ') * lpeg.R('az', '\127\255')^0 * -lpeg.V('word_char') +
+    lpeg.R('AZ', '\127\255')^1 * -lpeg.V('word_char'),
   word = lpeg.V('word_part') * (lpeg.S("-'") * lpeg.V('word_part'))^-1 *
-         -(lpeg.V('word_char') + lpeg.S("-'.") * lpeg.V('word_char')),
+    -(lpeg.V('word_char') + lpeg.S("-'.") * lpeg.V('word_char')),
   skip = lpeg.V('word_char')^1 * (lpeg.S("-'.") * lpeg.V('word_char')^1)^0 +
-         (1 - lpeg.V('word_char'))^1,
+    (1 - lpeg.V('word_char'))^1,
 }
 
 -- Returns a generator that acts like string.gmatch, but for LPeg patterns.
@@ -180,7 +182,7 @@ end
 function M.check_spelling(interactive, wrapped)
   -- Show suggestions for the misspelled word under the caret if necessary.
   if interactive and buffer:indicator_all_on_for(buffer.current_pos) &
-                     1 << M.INDIC_SPELLING > 0 then
+     1 << M.INDIC_SPELLING > 0 then
     local s = buffer:indicator_start(M.INDIC_SPELLING, buffer.current_pos)
     local e = buffer:indicator_end(M.INDIC_SPELLING, buffer.current_pos)
     show_suggestions(buffer:text_range(s, e))
@@ -194,7 +196,7 @@ function M.check_spelling(interactive, wrapped)
   local spellcheckable_styles = {} -- cache
   local buffer, style_at = buffer, buffer.style_at
   local i = (not interactive or wrapped) and 0 or
-            buffer:word_start_position(buffer.current_pos, false)
+    buffer:word_start_position(buffer.current_pos, false)
   while i < buffer.length do
     -- Ensure at least the next page of text is styled since spellcheck-able
     -- ranges depend on accurate styling.
@@ -205,7 +207,7 @@ function M.check_spelling(interactive, wrapped)
     local style = style_at[i]
     if spellcheckable_styles[style] == nil then
       -- Update the cache.
-      local style_name = buffer.style_name[style]
+      local style_name = buffer:name_of_style(style)
       spellcheckable_styles[style] = M.spellcheckable_styles[style_name] == true
     end
     if spellcheckable_styles[style] then
@@ -268,7 +270,7 @@ for i = 1, #m_tools - 1 do
         {''},
         {_L['Open User Dictionary'], function()
           if not lfs.attributes(user_dicts) then lfs.mkdir(user_dicts) end
-          io.open_file(user_dicts..(not WIN32 and '/' or '\\')..'user.dic')
+          io.open_file(user_dicts .. (not WIN32 and '/' or '\\') .. 'user.dic')
         end}
       })
       break

@@ -165,22 +165,18 @@ local Server = {}
 function Server.new(lexer, cmd, init_options)
   local root = assert(io.get_project_root(), _L['No project root found'])
   local current_view = view
-  ui._print('[LSP]', 'Starting language server: '..cmd)
+  ui._print('[LSP]', 'Starting language server: ' .. cmd)
   ui.goto_view(current_view)
-  local server = setmetatable({lexer = lexer, request_id = 0},
-                              {__index = Server})
-  server.proc = assert(os.spawn(cmd, root,
-                                function(output)
-                                  server:handle_stdout(output)
-                                end,
-                                function(output) server:log(output) end,
-                                function(status)
-                                  server:log('Server exited with status '..
-                                             status)
-                                end))
+  local server = setmetatable(
+    {lexer = lexer, request_id = 0}, {__index = Server})
+  server.proc = assert(os.spawn(
+    cmd, root, function(output) server:handle_stdout(output) end,
+    function(output) server:log(output) end,
+    function(status) server:log('Server exited with status ' .. status) end))
   local result = server:request('initialize', {
     processId = json.null,
-    rootUri = not WIN32 and 'file://'..root or 'file:///'..root:gsub('\\', '/'),
+    rootUri = not WIN32 and 'file://' .. root or
+      'file:///' .. root:gsub('\\', '/'),
     initializationOptions = init_options,
     capabilities = {
       --workspace = nil,
@@ -250,7 +246,7 @@ function Server:read()
   local len = tonumber(line:match('%d+$'))
   while #line > 0 do line = self.proc:read() end -- skip other headers
   local data = self.proc:read(len)
-  if M.log_rpc then self:log('RPC recv: '..data) end
+  if M.log_rpc then self:log('RPC recv: ' .. data) end
   return json.decode(data)
 end
 
@@ -271,9 +267,9 @@ function Server:request(method, params)
     jsonrpc = '2.0', id = self.request_id, method = method, params = params
   }
   local data = json.encode(message)
-  if M.log_rpc then self:log('RPC send: '..data) end
-  self.proc:write(string.format('Content-Length: %d\r\n\r\n%s\r\n', #data + 2,
-                                data))
+  if M.log_rpc then self:log('RPC send: ' .. data) end
+  self.proc:write(string.format(
+    'Content-Length: %d\r\n\r\n%s\r\n', #data + 2, data))
   -- Read incoming JSON messages until the proper response is found.
   repeat
     message = self:read()
@@ -281,7 +277,7 @@ function Server:request(method, params)
     if not message.id then
       self:handle_notification(message.method, message.params)
     elseif tonumber(message.id) > self.request_id then
-      self:log('Ignoring incoming server request: '..message.method)
+      self:log('Ignoring incoming server request: ' .. message.method)
       self.request_id = tonumber(message.id) + 1 -- update
       message.id = nil
     end
@@ -297,9 +293,9 @@ end
 function Server:notify(method, params)
   local message = {jsonrpc = '2.0', method = method, params = params or {}}
   local data = json.encode(message)
-  if M.log_rpc then self:log('RPC send: '..data) end
-  self.proc:write(string.format('Content-Length: %d\r\n\r\n%s\r\n', #data + 2,
-                                data))
+  if M.log_rpc then self:log('RPC send: ' .. data) end
+  self.proc:write(string.format(
+    'Content-Length: %d\r\n\r\n%s\r\n', #data + 2, data))
 end
 
 ---
@@ -309,9 +305,9 @@ end
 function Server:respond(id, result)
   local message = {jsonrpc = '2.0', id = id, result = result}
   local data = json.encode(message)
-  if M.log_rpc then self:log('RPC send: '..data) end
-  self.proc:write(string.format('Content-Length: %d\r\n\r\n%s\r\n', #data + 2,
-                                data))
+  if M.log_rpc then self:log('RPC send: ' .. data) end
+  self.proc:write(string.format(
+    'Content-Length: %d\r\n\r\n%s\r\n', #data + 2, data))
 end
 
 ---
@@ -326,7 +322,7 @@ function Server:handle_stdout(output)
     if not message.id then
       self:handle_notification(message.method, message.params)
     else
-      self:log('Ignoring incoming server request: '..message.method)
+      self:log('Ignoring incoming server request: ' .. message.method)
     end
     self:handle_stdout(output:sub(e + len)) -- process any other messages
   elseif output:find('^%S+$') then
@@ -349,9 +345,8 @@ end
 -- @param uri LSP DocumentUri to convert into a filename.
 local function tofilename(uri)
   local filename = uri:gsub(not WIN32 and '^file://' or '^file:///', '')
-  filename = filename:gsub('%%(%x%x)', function(hex)
-    return string.char(tonumber(hex, 16))
-  end)
+  filename = filename:gsub(
+    '%%(%x%x)', function(hex) return string.char(tonumber(hex, 16)) end)
   if WIN32 then filename = filename:gsub('/', '\\') end
   return filename
 end
@@ -361,7 +356,7 @@ end
 local function tobufferrange(range)
   local s = buffer:position_from_line(range.start.line) + range.start.character
   local e = buffer:position_from_line(range['end'].line) +
-            range['end'].character
+    range['end'].character
   return s, e
 end
 
@@ -381,7 +376,7 @@ function Server:handle_notification(method, params)
     else
       -- Present options in the message and respond with the selected option.
       for i = 1, #params.actions do
-        dialog_options['button'..i] = params.actions[i].title
+        dialog_options['button' .. i] = params.actions[i].title
       end
       local result = {title = ui.dialogs.msgbox(dialog_options)}
       -- TODO: option cannot be "delete"
@@ -403,11 +398,10 @@ function Server:handle_notification(method, params)
       buffer:indicator_clear_range(0, buffer.length)
     end
     buffer:annotation_clear_all()
-    for i = 1, #params.diagnostics do
-      local diagnostic = params.diagnostics[i]
-      buffer.indicator_current = (not diagnostic.severity or
-                                  diagnostic.severity == 1) and M.INDIC_ERROR or
-                                  M.INDIC_WARN
+    for _, diagnostic in ipairs(params.diagnostics) do
+      buffer.indicator_current =
+        (not diagnostic.severity or diagnostic.severity == 1) and
+        M.INDIC_ERROR or M.INDIC_WARN
       local s, e = tobufferrange(diagnostic.range)
       local line = buffer:line_from_position(e)
       local current_line = buffer:line_from_position(buffer.current_pos)
@@ -419,10 +413,10 @@ function Server:handle_notification(method, params)
         -- TODO: diagnostics should be persistent in projects.
       end
     end
-  elseif not events.emit(events.LSP_NOTIFICATION, self.lexer, self, method,
-                         params) then
+  elseif not events.emit(
+           events.LSP_NOTIFICATION, self.lexer, self, method, params) then
     -- Unknown notification.
-    self:log('unexpected notification: '..method)
+    self:log('unexpected notification: ' .. method)
   end
 end
 
@@ -433,8 +427,8 @@ end
 function Server:sync_buffer()
   self:notify('textDocument/didChange', {
     textDocument = {
-      uri = not WIN32 and 'file://'..buffer.filename or
-            'file:///'..buffer.filename:gsub('\\', '/'),
+      uri = not WIN32 and 'file://' .. buffer.filename or
+        'file:///' .. buffer.filename:gsub('\\', '/'),
       version = os.time() -- just make sure it keeps increasing
     },
     contentChanges = {{text = buffer:get_text()}}
@@ -446,8 +440,8 @@ end
 -- @param buffer Buffer opened.
 function Server:notify_opened(buffer)
   self:notify('textDocument/didOpen', {textDocument = {
-    uri = not WIN32 and 'file://'..buffer.filename or
-          'file:///'..buffer.filename:gsub('\\', '/'),
+    uri = not WIN32 and 'file://' .. buffer.filename or
+      'file:///' .. buffer.filename:gsub('\\', '/'),
     languageId = buffer:get_lexer(), version = 0, text = buffer:get_text()
   }})
 end
@@ -468,8 +462,7 @@ function M.start()
   servers[lexer] = ok and server or nil -- replace sentinel
   assert(ok, server)
   -- Send file opened notifications for open files.
-  for i = 1, #_BUFFERS do
-    local buffer = _BUFFERS[i]
+  for _, buffer in ipairs(_BUFFERS) do
     if buffer.filename and buffer:get_lexer() == lexer then
       server:notify_opened(buffer)
     end
@@ -493,8 +486,8 @@ end
 local function get_buffer_position_params()
   return {
     textDocument = {
-      uri = not WIN32 and 'file://'..buffer.filename or
-            'file:///'..buffer.filename:gsub('\\', '/')
+      uri = not WIN32 and 'file://' .. buffer.filename or
+        'file:///' .. buffer.filename:gsub('\\', '/')
     },
     position = {
       line = buffer:line_from_position(buffer.current_pos),
@@ -516,8 +509,7 @@ end
 local function goto_selected_symbol(symbols)
   -- Prepare items for display in a filteredlist dialog.
   local items = {}
-  for i = 1, #symbols do
-    local symbol = symbols[i]
+  for _, symbol in ipairs(symbols) do
     items[#items + 1] = symbol.name
     items[#items + 1] = symbol_kinds[symbol.kind]
     if not symbol.location then
@@ -555,8 +547,8 @@ function M.goto_symbol(symbol)
   elseif server.capabilities.documentSymbolProvider then
     -- Fetching symbols in the current buffer.
     symbols = server:request('textDocument/documentSymbol', {textDocument = {
-      uri = not WIN32 and 'file://'..buffer.filename or
-            'file:///'..buffer.filename:gsub('\\', '/')
+      uri = not WIN32 and 'file://' .. buffer.filename or
+        'file:///' .. buffer.filename:gsub('\\', '/')
     }})
   end
   if symbols and #symbols > 0 then goto_selected_symbol(symbols) end
@@ -568,8 +560,8 @@ textadept.editing.autocompleters.lsp = function()
   if server and buffer.filename and server.capabilities.completionProvider then
     server:sync_buffer()
     -- Fetch a completion list.
-    local completions = server:request('textDocument/completion',
-                                       get_buffer_position_params())
+    local completions = server:request(
+      'textDocument/completion', get_buffer_position_params())
     if not completions then return end
     if completions.isIncomplete then
       ui.statusbar_text = _L['Note: completion list incomplete']
@@ -578,13 +570,12 @@ textadept.editing.autocompleters.lsp = function()
     if #completions == 0 then return end
     -- Associate completion items with icons.
     local symbols = {}
-    for i = 1, #completions do
-      local symbol = completions[i]
+    for _, symbol in ipairs(completions) do
       local label = symbol.textEdit and symbol.textEdit.newText or
-                    symbol.insertText or symbol.label
+        symbol.insertText or symbol.label
       -- TODO: some labels can have spaces and need proper handling.
-      symbols[#symbols + 1] = string.format('%s?%d', label,
-                                            xpm_map[symbol.kind])
+      symbols[#symbols + 1] = string.format(
+        '%s?%d', label, xpm_map[symbol.kind]) -- TODO: auto_c_type_separator
       -- TODO: if symbol.preselect then symbols.selected = label end?
     end
     -- Return the autocompletion list.
@@ -610,14 +601,14 @@ function M.hover(position)
   local server = servers[buffer:get_lexer()]
   if server and buffer.filename and server.capabilities.hoverProvider then
     server:sync_buffer()
-    local hover = server:request('textDocument/hover',
-                                 get_buffer_position_params())
+    local hover = server:request(
+      'textDocument/hover', get_buffer_position_params())
     if not hover then return end
     local contents = hover.contents
     if type(contents) == 'table' then
       -- LSP MarkedString[] or MarkupContent.
-      for i = 1, #contents do
-        if type(contents[i]) == 'table' then contents[i] = contents[i].value end
+      for i, content in ipairs(contents) do
+        if type(content) == 'table' then contents[i] = content.value end
       end
       contents = contents.value or table.concat(contents, '\n')
     end
@@ -637,30 +628,30 @@ function M.signature_help()
   if server and buffer.filename and
      server.capabilities.signatureHelpProvider then
     server:sync_buffer()
-    signatures = server:request('textDocument/signatureHelp',
-                                get_buffer_position_params())
+    signatures = server:request(
+      'textDocument/signatureHelp', get_buffer_position_params())
     if not signatures or #signatures.signatures == 0 then
       signatures = {} -- reset
       return
     end
     signatures.signatures.active = (signatures.activeSignature or 0) + 1
     signatures = signatures.signatures
-    for i = 1, #signatures do
-      local doc = signatures[i].documentation or ''
+    for i, signature in ipairs(signatures) do
+      local doc = signature.documentation or ''
       -- Construct calltip text.
       if type(doc) == 'table' then doc = doc.value end -- LSP MarkupContent
-      doc = signatures[i].label..'\n'..doc
+      doc = string.format('%s\n%s', signature.label, doc)
       -- Wrap long lines in a rudimentary way.
       local lines, edge_column = {}, buffer.edge_column
       if edge_column == 0 then edge_column = 80 end
       for line in doc:gmatch('[^\n]+') do
-        for i = 1, #line, edge_column do
-          lines[#lines + 1] = line:sub(i, i + edge_column - 1)
+        for j = 1, #line, edge_column do
+          lines[#lines + 1] = line:sub(j, j + edge_column - 1)
         end
       end
       doc = table.concat(lines, '\\\n')
       -- Add arrow indicators for multiple signatures.
-      if #signatures > 1 then doc = '\001'..doc:gsub('\n', '\n\002', 1) end
+      if #signatures > 1 then doc = '\001' .. doc:gsub('\n', '\n\002', 1) end
       signatures[i] = doc
     end
     buffer:call_tip_show(buffer.current_pos, signatures[signatures.active])
@@ -690,10 +681,10 @@ end)
 -- @return `true` if a definition was found; `false` otherwise
 local function goto_definition(kind)
   local server = servers[buffer:get_lexer()]
-  if server and buffer.filename and server.capabilities[kind..'Provider'] then
+  if server and buffer.filename and server.capabilities[kind .. 'Provider'] then
     server:sync_buffer()
-    local location = server:request('textDocument/'..kind,
-                                    get_buffer_position_params())
+    local location = server:request(
+      'textDocument/' .. kind, get_buffer_position_params())
     if not location or not location.uri and #location == 0 then return false end
     if not location.uri then
       -- List of LSP Locations, instead of a single Location.
@@ -749,12 +740,11 @@ function M.find_references()
     params.context = {includeDeclaration = true}
     local locations = server:request('textDocument/references', params)
     if not locations or #locations == 0 then return end
-    for i = 1, #locations do
+    for _, location in ipairs(locations) do
       -- Print trailing ': ' to enable 'find in files' features like
       -- double-click, menu items, Return keypress, etc.
-      ui._print(_L['[Files Found Buffer]'],
-                string.format('%s:%d: ', tofilename(locations[i].uri),
-                              locations[i].range.start.line))
+      ui._print(_L['[Files Found Buffer]'], string.format(
+        '%s:%d: ', tofilename(location.uri), location.range.start.line))
     end
   end
 end
@@ -776,8 +766,8 @@ events.connect(events.FILE_AFTER_SAVE, function(filename, saved_as)
     server:notify_opened(buffer)
   else
     server:notify('textDocument/didSave', {textDocument = {
-      uri = not WIN32 and 'file://'..buffer.filename or
-        'file:///'..buffer.filename:gsub('\\', '/'),
+      uri = not WIN32 and 'file://' .. buffer.filename or
+        'file:///' .. buffer.filename:gsub('\\', '/'),
       languageId = buffer:get_lexer(), version = 0
     }})
   end
@@ -792,6 +782,7 @@ events.connect(events.DWELL_START, function(position)
   if server then M.hover(position) end
 end)
 events.connect(events.DWELL_END, function()
+  if not buffer.get_lexer then return end
   local server = servers[buffer:get_lexer()]
   if server then buffer:call_tip_cancel() end
 end)
@@ -807,8 +798,7 @@ end)
 -- Gracefully shutdown language servers on reset. They will be restarted as
 -- buffers are reloaded.
 events.connect(events.RESET_BEFORE, function()
-  for i = 1, #servers do
-    local server = servers[i]
+  for _, server in ipairs(servers) do
     server:request('shutdown')
     server:notify('exit')
     servers[buffer:get_lexer()] = nil
@@ -832,16 +822,18 @@ for i = 1, #m_tools - 1 do
           if server then
             ui.dialogs.ok_msgbox{
               title = _L['Start Server...']:gsub('_', ''),
-              text = buffer:get_lexer()..' '..
-                     _L['language server is already running'],
+              text = string.format(
+                '%s %s', buffer:get_lexer(),
+                _L['language server is already running']),
               no_cancel = true
             }
             return
           end
           local button, cmd = ui.dialogs.inputbox{
             title = _L['Start Server...']:gsub('_', ''),
-            informative_text = buffer:get_lexer()..' '..
-                               _L['language server shell command:'],
+            informative_text = string.format(
+              '%s %s', buffer:get_lexer(),
+              _L['language server shell command:']),
             button1 = _L['OK'], button2 = _L['Cancel']
           }
           if button == 1 and cmd ~= '' then M.start(cmd) end
@@ -851,8 +843,8 @@ for i = 1, #m_tools - 1 do
           if not server then return end
           local button = ui.dialogs.ok_msgbox{
             title = _L['Stop Server?'],
-            text = string.format('%s %s?', _L['Stop the language server for'],
-                                 buffer:get_lexer())
+            text = string.format(
+              '%s %s?', _L['Stop the language server for'], buffer:get_lexer())
           }
           if button == 1 then M.stop() end
         end},
