@@ -144,31 +144,29 @@ keys.python = {
 
 -- Snippets.
 
-if type(snippets) == 'table' then
 ---
 -- Container for Python-specific snippets.
 -- @class table
 -- @name _G.snippets.python
-  snippets.python = {
-    ['.'] = 'self.',
-    __ = '__%1(init)__',
-    def = 'def %1(name)(%2(arg)):\n\t%3("""%4\n\t"""\n\t)',
-    defs = 'def %1(name)(self%2(, %3(arg))):\n\t%4("""%5\n\t"""\n\t)',
-    ifmain = 'if __name__ == "__main__":\n\t%1(main())',
-    class = [[
+snippets.python = {
+  ['.'] = 'self.',
+  __ = '__%1(init)__',
+  def = 'def %1(name)(%2(arg)):\n\t%3("""%4\n\t"""\n\t)',
+  defs = 'def %1(name)(self%2(, %3(arg))):\n\t%4("""%5\n\t"""\n\t)',
+  ifmain = 'if __name__ == "__main__":\n\t%1(main())',
+  class = [[
 class %1(ClassName)(%2(object)):
-	"""%3(documentation)
-	"""
-	def __init__(self%4(, %5(arg))):
-		%6(super(%1, self).__init__())]],
-    try = [[
+"""%3(documentation)
+"""
+def __init__(self%4(, %5(arg))):
+  %6(super(%1, self).__init__())]],
+  try = [[
 try:
-	%0
+%0
 except %2(Exception), %3(e):
-	%4(pass)%5(
+%4(pass)%5(
 finally:
-	%6(pass))]]
-  }
-end
+%6(pass))]]
+}
 
 return M

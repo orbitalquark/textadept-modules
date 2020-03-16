@@ -360,12 +360,10 @@ keys.css = {}
 
 -- Snippets.
 
-if type(snippets) == 'table' then
 ---
 -- Container for CSS-specific snippets.
 -- @class table
 -- @name _G.snippets.css
-  snippets.css = {}
-end
+snippets.css = {}
 
 return M

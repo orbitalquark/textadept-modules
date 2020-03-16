@@ -70,12 +70,10 @@ keys.yaml = {
 
 -- Snippets.
 
-if type(snippets) == 'table' then
 ---
 -- Container for YAML-specific snippets.
 -- @class table
 -- @name _G.snippets.yaml
-  snippets.yaml = {}
-end
+snippets.yaml = {}
 
 return M

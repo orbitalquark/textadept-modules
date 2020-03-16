@@ -322,24 +322,22 @@ keys.html = {}
 
 -- Snippets.
 
-if type(snippets) == 'table' then
 ---
 -- Container for HTML-specific snippets.
 -- @class table
 -- @name _G.snippets.html
-  snippets.html = {
-    c = '<!-- %0 -->',
-    ['<'] = '<%1(div)>\n\t%0\n</%1>',
-    divc = '<div class="%1">\n\t%0\n</div>',
-    divi = '<div id="%1">\n\t%0\n</div>',
-    br = '<br />\n%0',
-    table = '<table class="%1">\n\t<tr>\n\t\t<th>%0</th>\n\t</tr>\n</table>',
-    td = '<td>%0</td>',
-    tr = '<tr>\n\t%0\n</tr>',
-    ulc = '<ul class="%1(list)">\n\t%0\n</ul>',
-    ul = '<ul>\n\t%0\n</ul>',
-    li = '<li>%0</li>',
-  }
-end
+snippets.html = {
+  c = '<!-- %0 -->',
+  ['<'] = '<%1(div)>\n\t%0\n</%1>',
+  divc = '<div class="%1">\n\t%0\n</div>',
+  divi = '<div id="%1">\n\t%0\n</div>',
+  br = '<br />\n%0',
+  table = '<table class="%1">\n\t<tr>\n\t\t<th>%0</th>\n\t</tr>\n</table>',
+  td = '<td>%0</td>',
+  tr = '<tr>\n\t%0\n</tr>',
+  ulc = '<ul class="%1(list)">\n\t%0\n</ul>',
+  ul = '<ul>\n\t%0\n</ul>',
+  li = '<li>%0</li>',
+}
 
 return M

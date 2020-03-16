@@ -261,12 +261,11 @@ keys.rest = {
 
 -- Snippets.
 
-if type(snippets) == 'table' then
 ---
 -- Container for reST-specific snippets.
 -- @class table
 -- @name _G.snippets.rest
-  snippets.rest = {
+snippets.rest = {
     attention = [[
 .. attention::
    %0
@@ -372,7 +371,6 @@ if type(snippets) == 'table' then
     external_link_separated = [[`%1(link text)`_
 
 .. _`%1`: %2(http://example.com/)]],
-  }
-end
+}
 
 return M
