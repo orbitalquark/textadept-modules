@@ -16,10 +16,9 @@ module('_M.ruby')]]
 
 -- Sets default buffer properties for Ruby files.
 events.connect(events.LEXER_LOADED, function(lang)
-  if lang == 'ruby' then
-    buffer.word_chars =
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_?!'
-  end
+  if lang ~= 'ruby' then return end
+  buffer.word_chars =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_?!'
 end)
 
 -- Autocompletion and documentation.

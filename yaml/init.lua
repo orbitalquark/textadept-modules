@@ -18,14 +18,13 @@ M.lyaml = lyaml
 
 -- Always use spaces.
 events.connect(events.LEXER_LOADED, function(lexer)
-  if lexer == 'yaml' then
-    buffer.use_tabs = false
-    buffer.word_chars = table.concat{
-      'abcdefghijklmnopqrstuvwxyz',
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      '1234567890-*'
-    }
-  end
+  if lexer ~= 'yaml' then return end
+  buffer.use_tabs = false
+  buffer.word_chars = table.concat{
+    'abcdefghijklmnopqrstuvwxyz',
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    '1234567890-*'
+  }
 end)
 
 -- Commands.

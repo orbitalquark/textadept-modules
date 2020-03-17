@@ -13,10 +13,9 @@ if not _M.css then _M.css = require('css') end
 
 -- Sets default buffer properties for CSS files.
 events.connect(events.LEXER_LOADED, function(lang)
-  if lang == 'html' then
-    buffer.word_chars =
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
-  end
+  if lang ~= 'html' then return end
+  buffer.word_chars =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
 end)
 
 -- Autocompletion and documentation.
