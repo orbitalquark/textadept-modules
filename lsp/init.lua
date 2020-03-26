@@ -354,9 +354,10 @@ end
 -- Returns the start and end buffer positions for the given LSP Range.
 -- @param range LSP Range.
 local function tobufferrange(range)
-  local s = buffer:position_from_line(range.start.line) + range.start.character
-  local e = buffer:position_from_line(range['end'].line) +
-    range['end'].character
+  local s = buffer:position_from_line(range.start.line + 1) +
+    range.start.character + 1
+  local e = buffer:position_from_line(range['end'].line + 1) +
+    range['end'].character + 1
   return s, e
 end
 
@@ -395,7 +396,7 @@ function Server:handle_notification(method, params)
     if buffer.filename ~= tofilename(params.uri) then return end
     for _, indic in ipairs{M.INDIC_WARN, M.INDIC_ERROR} do
       buffer.indicator_current = indic
-      buffer:indicator_clear_range(0, buffer.length)
+      buffer:indicator_clear_range(1, buffer.length)
     end
     buffer:annotation_clear_all()
     for _, diagnostic in ipairs(params.diagnostics) do
@@ -409,7 +410,7 @@ function Server:handle_notification(method, params)
          (current_line ~= line and current_line + 1 ~= line) then
         buffer:indicator_fill_range(s, e - s)
         buffer.annotation_text[line] = diagnostic.message
-        buffer.annotation_style[line] = 8 -- error style
+        buffer.annotation_style[line] = 9 -- error style
         -- TODO: diagnostics should be persistent in projects.
       end
     end
@@ -490,8 +491,8 @@ local function get_buffer_position_params()
         'file:///' .. buffer.filename:gsub('\\', '/')
     },
     position = {
-      line = buffer:line_from_position(buffer.current_pos),
-      character = buffer.column[buffer.current_pos]
+      line = buffer:line_from_position(buffer.current_pos) - 1,
+      character = buffer.column[buffer.current_pos] - 1
     }
   }
 end

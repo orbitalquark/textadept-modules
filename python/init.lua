@@ -57,7 +57,7 @@ textadept.editing.autocompleters.python = function()
   -- Attempt to identify the symbol type.
   -- TODO: identify literals like "'foo'." and "[1, 2, 3].".
   local assignment = '%f[%w_]' .. symbol:gsub('(%p)', '%%%1') .. '%s*=%s*(.*)$'
-  for i = buffer:line_from_position(buffer.current_pos) - 1, 0, -1 do
+  for i = buffer:line_from_position(buffer.current_pos) - 1, 1, -1 do
     local expr = buffer:get_line(i):match(assignment)
     if expr then
       for patt, type in pairs(M.expr_types) do
@@ -100,7 +100,7 @@ textadept.editing.api_files.python = {
 events.connect(events.CHAR_ADDED, function(ch)
   if buffer:get_lexer() ~= 'python' or (ch ~= 10 and ch ~= 58) then return end
   local l = buffer:line_from_position(buffer.current_pos)
-  if l > 0 then
+  if l > 1 then
     local line = buffer:get_line(l - (ch == 10 and 1 or 0))
     if ch == 10 and line:find(':%s+$') then
       buffer.line_indentation[l] = buffer.line_indentation[l - 1] +
@@ -110,7 +110,7 @@ events.connect(events.CHAR_ADDED, function(ch)
            (line:find('^%s*else%s*:') or line:find('^%s*elif[^:]+:') or
              line:find('^%s*except[^:]*:') or line:find('^%s*finally%s*:')) then
       local try = not line:find('^%s*el')
-      for i = l - 1, 0, -1 do
+      for i = l - 1, 1, -1 do
         line = buffer:get_line(i)
         if buffer.line_indentation[i] <= buffer.line_indentation[l] and
            (not try and

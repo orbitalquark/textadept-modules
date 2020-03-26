@@ -56,7 +56,7 @@ function M.evaluate_repl()
     local i, j = buffer:line_from_position(s), buffer:line_from_position(e)
     if i < j then
       s = buffer:position_from_line(i)
-      if buffer.column[e] > 0 then e = buffer:position_from_line(j + 1) end
+      if buffer.column[e] > 1 then e = buffer:position_from_line(j + 1) end
     end
     code = buffer:text_range(s, e)
     last_line = buffer:line_from_position(e)
@@ -135,15 +135,14 @@ end
 -- @name cycle_history_prev
 function M.cycle_history_prev()
   if buffer:auto_c_active() then buffer:line_up() return end
-  if M.history.pos >= 1 then
-    for _ in (M.history[M.history.pos] or ''):gmatch('\n') do
-      buffer:line_delete()
-      buffer:delete_back()
-    end
+  if M.history.pos <= 1 then return end
+  for _ in (M.history[M.history.pos] or ''):gmatch('\n') do
     buffer:line_delete()
-    M.history.pos = math.max(M.history.pos - 1, 1)
-    buffer:add_text(M.history[M.history.pos])
+    buffer:delete_back()
   end
+  buffer:line_delete()
+  M.history.pos = math.max(M.history.pos - 1, 1)
+  buffer:add_text(M.history[M.history.pos])
 end
 
 ---
@@ -152,15 +151,14 @@ end
 -- @name cycle_history_next
 function M.cycle_history_next()
   if buffer:auto_c_active() then buffer:line_down() return end
-  if M.history.pos < #M.history then
-    for _ in (M.history[M.history.pos] or ''):gmatch('\n') do
-      buffer:line_delete()
-      buffer:delete_back()
-    end
+  if M.history.pos >= #M.history then return end
+  for _ in (M.history[M.history.pos] or ''):gmatch('\n') do
     buffer:line_delete()
-    M.history.pos = math.min(M.history.pos + 1, #M.history)
-    buffer:add_text(M.history[M.history.pos])
+    buffer:delete_back()
   end
+  buffer:line_delete()
+  M.history.pos = math.min(M.history.pos + 1, #M.history)
+  buffer:add_text(M.history[M.history.pos])
 end
 
 ---

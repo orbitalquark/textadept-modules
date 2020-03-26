@@ -182,7 +182,7 @@ end
 function M.check_spelling(interactive, wrapped)
   -- Show suggestions for the misspelled word under the caret if necessary.
   if interactive and buffer:indicator_all_on_for(buffer.current_pos) &
-     1 << M.INDIC_SPELLING > 0 then
+     1 << M.INDIC_SPELLING - 1 > 0 then
     local s = buffer:indicator_start(M.INDIC_SPELLING, buffer.current_pos)
     local e = buffer:indicator_end(M.INDIC_SPELLING, buffer.current_pos)
     show_suggestions(buffer:text_range(s, e))
@@ -190,14 +190,14 @@ function M.check_spelling(interactive, wrapped)
   end
   -- Clear existing spellcheck indicators.
   buffer.indicator_current = M.INDIC_SPELLING
-  if not interactive then buffer:indicator_clear_range(0, buffer.length) end
+  if not interactive then buffer:indicator_clear_range(1, buffer.length) end
   -- Iterate over spellcheck-able text ranges, checking words in them, and
   -- marking misspellings.
   local spellcheckable_styles = {} -- cache
   local buffer, style_at = buffer, buffer.style_at
-  local i = (not interactive or wrapped) and 0 or
+  local i = (not interactive or wrapped) and 1 or
     buffer:word_start_position(buffer.current_pos, false)
-  while i < buffer.length do
+  while i <= buffer.length do
     -- Ensure at least the next page of text is styled since spellcheck-able
     -- ranges depend on accurate styling.
     if i > buffer.end_styled then
@@ -212,7 +212,7 @@ function M.check_spelling(interactive, wrapped)
     end
     if spellcheckable_styles[style] then
       local j = i + 1
-      while j < buffer.length and style_at[j] == style do j = j + 1 end
+      while j <= buffer.length and style_at[j] == style do j = j + 1 end
       for e, s, word in lpeg_gmatch(word_patt, buffer:text_range(i, j)) do
         if not M.spellchecker:spell(word) then
           buffer:indicator_fill_range(i + s - 1, e - s)
@@ -239,7 +239,7 @@ events.connect(events.FILE_AFTER_SAVE, function()
 end)
 -- Show spelling suggestions when clicking on misspelled words.
 events.connect(events.INDICATOR_CLICK, function(position)
-  if buffer:indicator_all_on_for(position) & 1 << M.INDIC_SPELLING > 0 then
+  if buffer:indicator_all_on_for(position) & 1 << M.INDIC_SPELLING - 1 > 0 then
     buffer:goto_pos(position)
     M.check_spelling(true)
   end

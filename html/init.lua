@@ -282,7 +282,7 @@ textadept.editing.autocompleters.html = function()
     local symbol, part = line:match('<([%w:]+)[^<>]-([%w:]*)$')
     if not symbol and not part then
       -- Look back for an open tag.
-      for i = buffer:line_from_position(buffer.current_pos) - 1, 0, -1 do
+      for i = buffer:line_from_position(buffer.current_pos) - 1, 1, -1 do
         local line = buffer:get_line(i)
         if line:find('>[^<]*$') then break end
         symbol = line:match('<(%w+)[^>]*$')

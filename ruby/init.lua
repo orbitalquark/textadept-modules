@@ -63,7 +63,7 @@ textadept.editing.autocompleters.ruby = function()
   -- Attempt to identify the symbol type.
   -- TODO: identify literals like "'foo'." and "[1, 2, 3].".
   local assignment = '%f[%w_]' .. symbol:gsub('(%p)', '%%%1') .. '%s*=%s*(.*)$'
-  for i = buffer:line_from_position(buffer.current_pos) - 1, 0, -1 do
+  for i = buffer:line_from_position(buffer.current_pos) - 1, 1, -1 do
     local expr = buffer:get_line(i):match(assignment)
     if expr then
       for patt, type in pairs(M.expr_types) do
@@ -167,7 +167,7 @@ function M.toggle_block()
   while p < e do
     if char_at[p] == 125 then -- '}'
       local s = buffer:brace_match(p, 0)
-      if s >= 0 then
+      if s >= 1 then
         local block = buffer:text_range(s + 1, p)
         local hash = false
         local s2, e2 = block:find('%b{}')
@@ -206,8 +206,8 @@ function M.toggle_block()
   end
   local do_patt, end_patt = 'do%s*|?[^|]*|?%s*$', '^%s*end'
   local s = line
-  while s >= 0 and not buffer:get_line(s):find(do_patt) do s = s - 1 end
-  if s < 0 then return end -- no block start found
+  while s >= 1 and not buffer:get_line(s):find(do_patt) do s = s - 1 end
+  if s < 1 then return end -- no block start found
   local indent = line_indentation[s]
   e = s + 1
   while e < buffer.line_count and

@@ -124,7 +124,7 @@ textadept.editing.autocompleters.rest = function()
     end
   elseif line_part:find('^%s*:[%w-]*$') then
     -- Autocomplete parameter or role.
-    for i = buffer:line_from_position(buffer.current_pos) - 1, 0, -1 do
+    for i = buffer:line_from_position(buffer.current_pos) - 1, 1, -1 do
       line = buffer:get_line(i)
       local dir_options = options[line:match('^%s*%.%. ([%w-]+)::[ \r\n]')]
       if dir_options then
@@ -169,9 +169,9 @@ end)
 -- Enable folding by the Sphinx convention for detected Sphinx files:
 -- # > * > = > - > ^ > ".
 events.connect(events.LEXER_LOADED, function(lexer)
-  if lexer == 'rest' and buffer:get_line(0):find('^%s*%.%. .-sphinx') then
+  if lexer == 'rest' and buffer:get_line(1):find('^%s*%.%. .-sphinx') then
     buffer.property['fold.by.sphinx.convention'] = '1'
-    buffer:colourise(0, buffer.end_styled)
+    buffer:colourise(1, buffer.end_styled)
   end
 end)
 
@@ -196,10 +196,10 @@ events.connect(events.FILE_AFTER_SAVE, function()
             if msg:find(string.format('"%s"', role)) then goto continue end
           end
         end
-        buffer.annotation_text[line_num - 1] = msg
-        buffer.annotation_style[line_num - 1] = 8 -- error style number
+        buffer.annotation_text[line_num] = msg
+        buffer.annotation_style[line_num] = 9 -- error style number
         if not jumped then
-          buffer:goto_line(line_num - 1)
+          buffer:goto_line(line_num)
           jumped = true
         end
         ::continue::
@@ -213,11 +213,11 @@ end)
 -- Requires the entire document to be styled.
 -- @name goto_section
 function M.goto_section()
-  if buffer.end_styled < buffer.length - 1 then
-    buffer:colourise(0, buffer.length - 1)
+  if buffer.end_styled < buffer.length then
+    buffer:colourise(1, -1)
   end
   local items = {}
-  for i = 0, buffer.line_count - 2 do
+  for i = 1, buffer.line_count - 2 do
     if buffer.fold_level[i + 1] & buffer.FOLDLEVELHEADERFLAG > 0 then
       local name = buffer:get_line(i + 1):match('^.') ..
         buffer:get_line(i):match('^[^\r\n]*')
@@ -229,7 +229,7 @@ function M.goto_section()
     search_column = 2, string_output = true
   }
   if button ~= _L['OK'] then return end
-  textadept.editing.goto_line(tonumber(i) - 1)
+  textadept.editing.goto_line(tonumber(i))
 end
 
 ---

@@ -222,14 +222,14 @@ function M.goto_tag(tag)
   if not lfs.attributes(tag[2]) then return end
   io.open_file(tag[2])
   if not tonumber(tag[3]) then
-    for i = 0, buffer.line_count - 1 do
+    for i = 1, buffer.line_count do
       if buffer:get_line(i):find(tag[3], 1, true) then
         textadept.editing.goto_line(i)
         break
       end
     end
   else
-    textadept.editing.goto_line(tonumber(tag[3]) - 1)
+    textadept.editing.goto_line(tonumber(tag[3]))
   end
   -- Store the new position in the jump history.
   require('history').append(

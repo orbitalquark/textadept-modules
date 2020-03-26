@@ -57,7 +57,7 @@ function M.to_html(filename, out_filename)
 
   -- Iterate over defined styles and convert them into CSS.
   html[#html + 1] = '<style type="text/css">'
-  for i = 0, 255 do
+  for i = 1, buffer.STYLE_MAX do
     local name = buffer:name_of_style(i)
     if name == 'Not Available' then goto continue end
     local style = {}
@@ -115,7 +115,7 @@ function M.to_html(filename, out_filename)
   -- Iterate over characters in the buffer, grouping styles into <span>s whose
   -- classes are their respective style names.
   local style_at = buffer.style_at
-  local pos, style = 0, style_at[0]
+  local pos, style = 1, style_at[1]
   local prev_pos, prev_style
   local text_range = buffer.text_range
   local position_after = buffer.position_after
@@ -135,7 +135,7 @@ function M.to_html(filename, out_filename)
     end)
     return format('%s</span>', code)
   end
-  while pos < buffer.length do
+  while pos <= buffer.length do
     style = style_at[pos]
     if style ~= prev_style then
       -- Start of new <span>. Finish the old one first, if necessary.
@@ -149,7 +149,8 @@ function M.to_html(filename, out_filename)
   end
   -- Finish any incomplete <span>.
   if prev_pos then
-    html[#html + 1] = format_span(text_range(buffer, prev_pos, buffer.length))
+    html[#html + 1] = format_span(
+      text_range(buffer, prev_pos, buffer.length + 1))
   end
 
   html[#html + 1] = '</body></html>'

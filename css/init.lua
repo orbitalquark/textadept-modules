@@ -300,7 +300,7 @@ textadept.editing.autocompleters.css = function()
     -- Autocomplete selector, pseudoclass, pseudoelement, property, or value,
     -- depending on context.
     if not in_selector then
-      for i = buffer:line_from_position(buffer.current_pos) - 1, 0, -1 do
+      for i = buffer:line_from_position(buffer.current_pos) - 1, 1, -1 do
         local line = buffer:get_line(i)
         if line:find('{[^}]*$') then in_selector = true break end
         if line:find('}[^{]*$') then break end -- not in selector

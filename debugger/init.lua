@@ -281,9 +281,7 @@ local function set_breakpoint(file, line)
   if not breakpoints[lexer] then breakpoints[lexer] = {} end
   if not breakpoints[lexer][file] then breakpoints[lexer][file] = {} end
   breakpoints[lexer][file][line] = true
-  if file == buffer.filename then
-    buffer:marker_add(line - 1, MARK_BREAKPOINT)
-  end
+  if file == buffer.filename then buffer:marker_add(line, MARK_BREAKPOINT) end
   if not states[lexer] then return end -- not debugging
   events.emit(events.DEBUGGER_BREAKPOINT_ADDED, lexer, file, line)
 end
@@ -332,7 +330,7 @@ function M.remove_breakpoint(file, line)
   if breakpoints[lexer] and breakpoints[lexer][file] then
     breakpoints[lexer][file][line] = nil
     if file == buffer.filename then
-      buffer:marker_delete(line - 1, MARK_BREAKPOINT)
+      buffer:marker_delete(line, MARK_BREAKPOINT)
     end
     if not states[lexer] then return end -- not debugging
     events.emit(events.DEBUGGER_BREAKPOINT_REMOVED, lexer, file, line)
@@ -354,7 +352,7 @@ function M.toggle_breakpoint(file, line)
   local lexer = buffer:get_lexer()
   if not file then file = buffer.filename end
   if not file then return end -- nothing to do
-  if not line then line = buffer:line_from_position(buffer.current_pos) + 1 end
+  if not line then line = buffer:line_from_position(buffer.current_pos) end
   if not breakpoints[lexer] or not breakpoints[lexer][file] or
      not breakpoints[lexer][file][line] then
     set_breakpoint(file, line)
@@ -604,8 +602,8 @@ function M.update_state(state)
   if state.file ~= buffer.filename then ui.goto_file(file) end
   states[buffer:get_lexer()] = state
   buffer:marker_delete_all(MARK_DEBUGLINE)
-  buffer:marker_add(state.line - 1, MARK_DEBUGLINE)
-  buffer:goto_line(state.line - 1)
+  buffer:marker_add(state.line, MARK_DEBUGLINE)
+  buffer:goto_line(state.line)
 end
 
 ---
@@ -673,8 +671,8 @@ events.connect(events.VIEW_NEW, set_marker_properties)
 
 -- Set breakpoint on margin-click.
 events.connect(events.MARGIN_CLICK, function(margin, position, modifiers)
-  if margin == 1 and modifiers == 0 then
-    M.toggle_breakpoint(nil, nil, buffer:line_from_position(position) + 1)
+  if margin == 2 and modifiers == 0 then
+    M.toggle_breakpoint(nil, buffer:line_from_position(position))
   end
 end)
 
@@ -684,7 +682,7 @@ events.connect(events.BUFFER_AFTER_SWITCH, function()
   if not breakpoints[lexer] or not breakpoints[lexer][file] then return end
   buffer:marker_delete_all(MARK_BREAKPOINT)
   for line in pairs(breakpoints[lexer][file]) do
-    buffer:marker_add(line - 1, MARK_BREAKPOINT)
+    buffer:marker_add(line, MARK_BREAKPOINT)
   end
 end)
 

@@ -38,9 +38,9 @@ events.connect(events.FILE_AFTER_SAVE, function()
   local msg, line, col =
     error:match('^(.-) at document: %d+, line: (%d+), column: (%d+)')
   if not line or not col then line, col, msg = 1, 1, error end
-  buffer.annotation_text[line - 1] = msg
-  buffer.annotation_style[line - 1] = 8 -- error style number
-  buffer:goto_pos(buffer:find_column(line - 1, col - 1))
+  buffer.annotation_text[line] = msg
+  buffer.annotation_style[line] = 9 -- error style number
+  buffer:goto_pos(buffer:find_column(line, col))
 end)
 
 ---
@@ -53,7 +53,7 @@ function M.goto_anchor()
   if anchor then
     buffer:target_whole_document()
     buffer.search_flags = buffer.FIND_WHOLEWORD
-    if buffer:search_in_target('&' .. anchor) >= 0 then
+    if buffer:search_in_target('&' .. anchor) ~= -1 then
       buffer:goto_pos(buffer.target_start)
     end
   end
