@@ -290,7 +290,7 @@ textadept.editing.autocompleters.css = function()
   -- Retrieve the symbol behind the caret and determine whether it is a
   -- selector, property, media type, etc.
   local line, pos = buffer:get_cur_line()
-  line = line:sub(1, pos)
+  line = line:sub(1, pos - 1)
   local symbol, op, part = line:match('([%w-]-)(:?:?)%s*([%w-]*)$')
   if symbol == '' and part == '' then return nil end -- nothing to complete
   local name = '^' .. part

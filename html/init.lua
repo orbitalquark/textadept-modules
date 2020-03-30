@@ -267,7 +267,7 @@ textadept.editing.autocompleters.html = function()
   -- Retrieve the symbol behind the caret and determine whether it is a tag or
   -- a tag attribute.
   local line, pos = buffer:get_cur_line()
-  line = line:sub(1, pos)
+  line = line:sub(1, pos - 1)
   if line:find('>[^<]*$') then return nil end -- outside tag
   if line:find('<([%w:]*)$') then
     -- Autocomplete tag.

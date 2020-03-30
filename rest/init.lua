@@ -112,7 +112,7 @@ textadept.editing.autocompleters.rest = function()
   local list = {}
   -- Retrieve the symbol behind the caret.
   local line, pos = buffer:get_cur_line()
-  local line_part = line:sub(1, pos)
+  local line_part = line:sub(1, pos - 1)
   local part = line_part:match('[%w-]*$')
   local name = '^' .. part
   -- Determine whether or not the symbol is a directive, parameter, or role, and
