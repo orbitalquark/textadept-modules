@@ -48,12 +48,10 @@ end
 -- the associated view.
 -- @class table
 -- @name view_history
-local view_history = {}
-events.connect(events.VIEW_NEW, function() view_history[view] = {pos = 0} end)
--- TODO: consider view deletions?
-events.connect(events.RESET_AFTER, function()
-  for i = 1, #_VIEWS do view_history[_VIEWS[i]] = {pos = 0} end
-end)
+local view_history = setmetatable({}, {__index = function(t, view)
+  t[view] = {pos = 0}
+  return t[view]
+end})
 
 -- Listens for text insertion and deletion events and records their locations.
 local function record_edit_location(position, modification_type, text, length)
