@@ -152,6 +152,9 @@ local function find_tags(tag)
     for line in f:lines() do
       local tag, file, ex_cmd, ext_fields = line:match(patt)
       if tag then
+        if file:find('^_HOME/.-%.luad?o?c?$') then
+          file = file:gsub('^_HOME', _HOME) -- special case for tadoc tags
+        end
         if not file:find('^%a?:?[/\\]') then file = dir .. file end
         if ex_cmd:find('^/') then ex_cmd = ex_cmd:match('^/^?(.-)$?/$') end
         tags[#tags + 1] = {tag, file:gsub('\\\\', '\\'), ex_cmd, ext_fields}
@@ -214,12 +217,12 @@ function M.goto_tag(tag)
   else
     tag = tags[1]
   end
+  if not lfs.attributes(tag[2]) then return end
   -- Store the current position in the jump history, if applicable.
   require('history').append(
     buffer.filename, buffer:line_from_position(buffer.current_pos),
     buffer.column[buffer.current_pos])
   -- Jump to the tag.
-  if not lfs.attributes(tag[2]) then return end
   io.open_file(tag[2])
   if not tonumber(tag[3]) then
     for i = 1, buffer.line_count do
