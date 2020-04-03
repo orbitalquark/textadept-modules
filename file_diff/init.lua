@@ -102,6 +102,8 @@ elseif not WIN32 then
   local p = io.popen('uname -i')
   if p:read('*a'):find('64') then lib = lib .. '64' end
   p:close()
+elseif CURSES then
+  lib = lib .. '-curses'
 end
 local diff = require(lib)
 local DELETE, INSERT = 0, 1 -- C++: "enum Operation {DELETE, INSERT, EQUAL};"

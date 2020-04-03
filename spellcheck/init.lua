@@ -41,8 +41,6 @@ local M = {}
 --   The Hunspell spellchecker object.
 module('spellcheck')]]
 
-if WIN32 and CURSES then return M end -- does not work
-
 M.check_spelling_on_save = true
 M.INDIC_SPELLING = _SCINTILLA.next_indic_number()
 
@@ -68,6 +66,8 @@ elseif not WIN32 then
   local p = io.popen('uname -i')
   if p:read('*a'):find('64') then lib = lib .. '64' end
   p:close()
+elseif CURSES then
+  lib = lib .. '-curses'
 end
 M.spell = require(lib)
 
@@ -247,7 +247,8 @@ end)
 
 -- Set up indicators, add a menu, and configure key bindings.
 local function set_properties()
-  buffer.indic_style[M.INDIC_SPELLING] = buffer.INDIC_DIAGONAL -- TODO: curses
+  buffer.indic_style[M.INDIC_SPELLING] = not CURSES and buffer.INDIC_DIAGONAL or
+    buffer.INDIC_STRAIGHTBOX
   buffer.indic_fore[M.INDIC_SPELLING] = buffer.property_int['color.red']
 end
 events.connect(events.VIEW_NEW, set_properties)

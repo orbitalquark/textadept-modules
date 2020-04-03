@@ -6,15 +6,9 @@ CXX = g++
 CXXFLAGS = -std=c++0x -pedantic -fPIC -Wall
 LDFLAGS = -Wl,--retain-symbols-file -Wl,$(ta_src)/lua.sym
 
-all: spell64.so spell.dll spellosx.so spell.so
+all: spell64.so spell.dll spell-curses.dll spellosx.so spell.so
 clean:
 	rm -f *.o *.so *.dll
-
-zip: README LICENSE init.lua en_US.aff en_US.dic spell64.so spell.dll \
-     spellosx.so spell.so spell.luadoc spellchecker.luadoc
-	mkdir spellcheck && cp $^ spellcheck
-	zip -r spellcheck.zip spellcheck
-	rm -r spellcheck
 
 # Platform objects.
 
@@ -31,6 +25,9 @@ hunspell_i386_objs = $(addsuffix -i386.o, $(basename $(hunspell_objs)))
 spell64.so: lspell64.o $(hunspell_objs)
 	$(CXX) -shared $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 spell.dll: lspell-win.o $(hunspell_win_objs) lua.la
+	$(CROSS_WIN)$(CXX) -shared -static-libgcc -static-libstdc++ $(CXXFLAGS) -o \
+		$@ $^ $(LDFLAGS)
+spell-curses.dll: lspell-win.o $(hunspell_win_objs) lua-curses.la
 	$(CROSS_WIN)$(CXX) -shared -static-libgcc -static-libstdc++ $(CXXFLAGS) -o \
 		$@ $^ $(LDFLAGS)
 spellosx.so: lspell-osx.o $(hunspell_osx_objs)
@@ -61,6 +58,11 @@ lua.def:
 	echo LIBRARY \"textadept.exe\" > $@ && echo EXPORTS >> $@
 	grep -v "^#" $(ta_src)/lua.sym >> $@
 lua.la: lua.def
+	$(CROSS_WIN)dlltool -d $< -l $@
+lua-curses.def:
+	echo LIBRARY \"textadept-curses.exe\" > $@ && echo EXPORTS >> $@
+	grep -v "^#" $(ta_src)/lua.sym >> $@
+lua-curses.la: lua-curses.def
 	$(CROSS_WIN)dlltool -d $< -l $@
 
 # External Hunspell dependency.

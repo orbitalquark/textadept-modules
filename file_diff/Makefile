@@ -6,14 +6,9 @@ CXX = g++
 CXXFLAGS = -g -std=c++0x -pedantic -fPIC -Wall
 LDFLAGS = -Wl,--retain-symbols-file -Wl,$(ta_src)/lua.sym
 
-all: diff64.so diff.dll diffosx.so diff.so
+all: diff64.so diff.dll diff-curses.dll diffosx.so diff.so
 clean:
 	rm -f *.o *.so *.dll
-
-zip: README LICENSE init.lua diff64.so diff.dll diffosx.so diff.so diff.luadoc
-	mkdir file_diff && cp $^ file_diff
-	zip -r file_diff.zip file_diff
-	rm -r file_diff
 
 CROSS_WIN = i686-w64-mingw32-
 CROSS_OSX = x86_64-apple-darwin9-
@@ -22,6 +17,9 @@ CXXFLAGS_OSX = -undefined dynamic_lookup -fPIC -Wall
 diff64.so: ldiff64.o
 	$(CXX) -shared $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 diff.dll: ldiff-win.o lua.la
+	$(CROSS_WIN)$(CXX) -shared -static-libgcc -static-libstdc++ $(CXXFLAGS) -o \
+		$@ $^ $(LDFLAGS)
+diff-curses.dll: ldiff-win.o lua-curses.la
 	$(CROSS_WIN)$(CXX) -shared -static-libgcc -static-libstdc++ $(CXXFLAGS) -o \
 		$@ $^ $(LDFLAGS)
 diffosx.so: ldiff-osx.o
@@ -43,6 +41,11 @@ lua.def:
 	echo LIBRARY \"textadept.exe\" > $@ && echo EXPORTS >> $@
 	grep -v "^#" $(ta_src)/lua.sym >> $@
 lua.la: lua.def
+	$(CROSS_WIN)dlltool -d $< -l $@
+lua-curses.def:
+	echo LIBRARY \"textadept-curses.exe\" > $@ && echo EXPORTS >> $@
+	grep -v "^#" $(ta_src)/lua.sym >> $@
+lua-curses.la: lua-curses.def
 	$(CROSS_WIN)dlltool -d $< -l $@
 
 # External diff_match_patch dependency.
