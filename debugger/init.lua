@@ -659,13 +659,13 @@ end
 
 -- Sets view properties for debug markers.
 local function set_marker_properties()
-  buffer.mouse_dwell_time = 500
-  buffer:marker_define(MARK_BREAKPOINT, buffer.MARK_FULLRECT)
-  buffer:marker_define(MARK_DEBUGLINE, buffer.MARK_FULLRECT)
-  buffer.marker_back[MARK_BREAKPOINT] = M.MARK_BREAKPOINT_COLOR
-  --buffer.marker_alpha[MARK_BREAKPOINT] = M.MARK_BREAKPOINT_ALPHA
-  buffer.marker_back[MARK_DEBUGLINE] = M.MARK_DEBUGLINE_COLOR
-  --buffer.marker_alpha[MARK_DEBUGLINE] = M.MARK_DEBUGLINE_ALPHA
+  view.mouse_dwell_time = 500
+  view:marker_define(MARK_BREAKPOINT, view.MARK_FULLRECT)
+  view:marker_define(MARK_DEBUGLINE, view.MARK_FULLRECT)
+  view.marker_back[MARK_BREAKPOINT] = M.MARK_BREAKPOINT_COLOR
+  --view.marker_alpha[MARK_BREAKPOINT] = M.MARK_BREAKPOINT_ALPHA
+  view.marker_back[MARK_DEBUGLINE] = M.MARK_DEBUGLINE_COLOR
+  --view.marker_alpha[MARK_DEBUGLINE] = M.MARK_DEBUGLINE_ALPHA
 end
 events.connect(events.VIEW_NEW, set_marker_properties)
 

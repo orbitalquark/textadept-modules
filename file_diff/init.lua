@@ -136,12 +136,12 @@ end
 -- Synchronize the scroll and line position of the other buffer.
 local function synchronize()
   local line = buffer:line_from_position(buffer.current_pos)
-  local visible_line = buffer:visible_from_doc_line(line)
-  local first_visible_line = buffer.first_visible_line
-  local x_offset = buffer.x_offset
+  local visible_line = view:visible_from_doc_line(line)
+  local first_visible_line = view.first_visible_line
+  local x_offset = view.x_offset
   ui.goto_view(view == view1 and view2 or view1)
-  buffer:goto_line(buffer:doc_line_from_visible(visible_line))
-  buffer.first_visible_line, buffer.x_offset = first_visible_line, x_offset
+  buffer:goto_line(view:doc_line_from_visible(visible_line))
+  view.first_visible_line, view.x_offset = first_visible_line, x_offset
   ui.goto_view(view == view2 and view1 or view2)
 end
 
@@ -270,14 +270,14 @@ function M.start(file1, file2, horizontal)
   end
   if _VIEWS[view1] and view ~= view1 then ui.goto_view(view1) end
   if file1 ~= '-' then io.open_file(file1) end
-  buffer.annotation_visible = buffer.ANNOTATION_STANDARD -- view1
+  view.annotation_visible = view.ANNOTATION_STANDARD -- view1
   if not _VIEWS[view1] or not _VIEWS[view2] then
     view1, view2 = view:split(not horizontal)
   else
     ui.goto_view(view2)
   end
   if file2 ~= '-' then io.open_file(file2) end
-  buffer.annotation_visible = buffer.ANNOTATION_STANDARD -- view2
+  view.annotation_visible = view.ANNOTATION_STANDARD -- view2
   ui.goto_view(view1)
   starting_diff = false
   if file1 == '-' or file2 == '-' then mark_changes() end
@@ -299,9 +299,9 @@ events.connect(events.BUFFER_DELETED, stop)
 -- @param line Line to get the synchronized equivalent of in the other buffer.
 -- @return line
 local function get_synchronized_line(line)
-  local visible_line = buffer:visible_from_doc_line(line)
+  local visible_line = view:visible_from_doc_line(line)
   ui.goto_view(view == view1 and view2 or view1)
-  line = buffer:doc_line_from_visible(visible_line)
+  line = view:doc_line_from_visible(visible_line)
   ui.goto_view(view == view2 and view1 or view2)
   return line
 end
@@ -358,9 +358,9 @@ function M.goto_change(next)
   if view == view1 then
     if line2 >= 1 then
       ui.goto_view(view2)
-      local visible_line = buffer:visible_from_doc_line(line2)
+      local visible_line = view:visible_from_doc_line(line2)
       ui.goto_view(view1)
-      local line2_1 = buffer:doc_line_from_visible(visible_line)
+      local line2_1 = view:doc_line_from_visible(visible_line)
       buffer:goto_line(
         line1 >= 1 and
         (next and line1 < line2_1 or not next and line1 > line2_1) and line1 or
@@ -371,9 +371,9 @@ function M.goto_change(next)
   else
     if line1 >= 1 then
       ui.goto_view(view1)
-      local visible_line = buffer:visible_from_doc_line(line1)
+      local visible_line = view:visible_from_doc_line(line1)
       ui.goto_view(view2)
-      local line1_2 = buffer:doc_line_from_visible(visible_line)
+      local line1_2 = view:doc_line_from_visible(visible_line)
       buffer:goto_line(
         line2 >= 1 and
         (next and line2 < line1_2 or not next and line2 > line1_2) and line2 or
@@ -382,7 +382,7 @@ function M.goto_change(next)
       buffer:goto_line(line2)
     end
   end
-  buffer:vertical_centre_caret()
+  view:vertical_centre_caret()
 end
 
 ---
@@ -469,7 +469,7 @@ local synchronizing = false
 events.connect(events.UPDATE_UI, function(updated)
   if _VIEWS[view1] and _VIEWS[view2] and updated and not synchronizing then
     if updated &
-       (buffer.UPDATE_H_SCROLL | buffer.UPDATE_V_SCROLL |
+       (view.UPDATE_H_SCROLL | view.UPDATE_V_SCROLL |
          buffer.UPDATE_SELECTION) > 0 then
       synchronizing = true
       synchronize()
@@ -490,16 +490,16 @@ events.connect(events.VIEW_NEW, function()
     [MARK_MODIFICATION] = M.theme .. '_yellow'
   }
   for mark, color in pairs(markers) do
-    buffer:marker_define(mark, buffer.MARK_BACKGROUND)
-    buffer.marker_back[mark] = buffer.property_int['color.' .. color]
+    view:marker_define(mark, view.MARK_BACKGROUND)
+    view.marker_back[mark] = buffer.property_int['color.' .. color]
   end
   local indicators = {
     [INDIC_ADDITION] = M.theme .. '_green', [INDIC_DELETION] = M.theme .. '_red'
   }
   for indic, color in pairs(indicators) do
-    buffer.indic_style[indic] = buffer.INDIC_FULLBOX
-    buffer.indic_fore[indic] = buffer.property_int['color.' .. color]
-    buffer.indic_alpha[indic], buffer.indic_under[indic] = 255, true
+    view.indic_style[indic] = view.INDIC_FULLBOX
+    view.indic_fore[indic] = buffer.property_int['color.' .. color]
+    view.indic_alpha[indic], view.indic_under[indic] = 255, true
   end
 end)
 

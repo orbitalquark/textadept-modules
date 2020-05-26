@@ -181,7 +181,7 @@ local cmd = 'python "' .. _HOME .. '/modules/rest/rst2pseudoxml.py" ' ..
 events.connect(events.FILE_AFTER_SAVE, function()
   if buffer:get_lexer() ~= 'rest' then return end
   buffer:annotation_clear_all()
-  buffer.annotation_visible = buffer.ANNOTATION_BOXED
+  view.annotation_visible = view.ANNOTATION_BOXED
   local jumped = false
   local filename = buffer.filename:iconv(_CHARSET, 'UTF-8')
   os.spawn(cmd:format(filename), M.DOCUTILS_PATH, nil, function(chunk)

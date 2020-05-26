@@ -643,7 +643,7 @@ function M.signature_help()
       if type(doc) == 'table' then doc = doc.value end -- LSP MarkupContent
       doc = string.format('%s\n%s', signature.label, doc)
       -- Wrap long lines in a rudimentary way.
-      local lines, edge_column = {}, buffer.edge_column
+      local lines, edge_column = {}, view.edge_column
       if edge_column == 0 then edge_column = 80 end
       for line in doc:gmatch('[^\n]+') do
         for j = 1, #line, edge_column do
@@ -790,10 +790,10 @@ end)
 
 -- Set diagnostic indicator styles.
 events.connect(events.VIEW_NEW, function()
-  buffer.indic_style[M.INDIC_WARN] = buffer.INDIC_SQUIGGLE
-  buffer.indic_fore[M.INDIC_WARN] = buffer.property_int['color.yellow']
-  buffer.indic_style[M.INDIC_ERROR] = buffer.INDIC_SQUIGGLE
-  buffer.indic_fore[M.INDIC_ERROR] = buffer.property_int['color.red']
+  view.indic_style[M.INDIC_WARN] = view.INDIC_SQUIGGLE
+  view.indic_fore[M.INDIC_WARN] = buffer.property_int['color.yellow']
+  view.indic_style[M.INDIC_ERROR] = view.INDIC_SQUIGGLE
+  view.indic_fore[M.INDIC_ERROR] = buffer.property_int['color.red']
 end)
 
 -- Gracefully shutdown language servers on reset. They will be restarted as
