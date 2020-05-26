@@ -410,7 +410,9 @@ function Server:handle_notification(method, params)
          (current_line ~= line and current_line + 1 ~= line) then
         buffer:indicator_fill_range(s, e - s)
         buffer.annotation_text[line] = diagnostic.message
-        buffer.annotation_style[line] = 9 -- error style
+        local GETNAMEDSTYLE = _SCINTILLA.properties.named_styles[1]
+        local style = buffer:private_lexer_call(GETNAMEDSTYLE, 'error')
+        buffer.annotation_style[line] = style
         -- TODO: diagnostics should be persistent in projects.
       end
     end

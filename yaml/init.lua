@@ -39,7 +39,9 @@ events.connect(events.FILE_AFTER_SAVE, function()
     error:match('^(.-) at document: %d+, line: (%d+), column: (%d+)')
   if not line or not col then line, col, msg = 1, 1, error end
   buffer.annotation_text[line] = msg
-  buffer.annotation_style[line] = 9 -- error style number
+  local GETNAMEDSTYLE = _SCINTILLA.properties.named_styles[1]
+  local style = buffer:private_lexer_call(GETNAMEDSTYLE, 'error')
+  buffer.annotation_style[line] = style
   buffer:goto_pos(buffer:find_column(line, col))
 end)
 

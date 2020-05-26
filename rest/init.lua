@@ -197,7 +197,9 @@ events.connect(events.FILE_AFTER_SAVE, function()
           end
         end
         buffer.annotation_text[line_num] = msg
-        buffer.annotation_style[line_num] = 9 -- error style number
+        local GETNAMEDSTYLE = _SCINTILLA.properties.named_styles[1]
+        local style = buffer:private_lexer_call(GETNAMEDSTYLE, 'error')
+        buffer.annotation_style[line_num] = style
         if not jumped then
           buffer:goto_line(line_num)
           jumped = true
