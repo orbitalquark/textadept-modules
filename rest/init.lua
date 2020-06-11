@@ -170,8 +170,8 @@ end)
 -- # > * > = > - > ^ > ".
 events.connect(events.LEXER_LOADED, function(lexer)
   if lexer == 'rest' and buffer:get_line(1):find('^%s*%.%. .-sphinx') then
-    buffer.property['fold.by.sphinx.convention'] = '1'
-    buffer:colourise(1, buffer.end_styled)
+    view.property['fold.by.sphinx.convention'] = '1'
+    buffer:colorize(1, buffer.end_styled)
   end
 end)
 
@@ -215,9 +215,7 @@ end)
 -- Requires the entire document to be styled.
 -- @name goto_section
 function M.goto_section()
-  if buffer.end_styled < buffer.length then
-    buffer:colourise(1, -1)
-  end
+  if buffer.end_styled < buffer.length then buffer:colorize(1, -1) end
   local items = {}
   for i = 1, buffer.line_count - 2 do
     if buffer.fold_level[i + 1] & buffer.FOLDLEVELHEADERFLAG > 0 then

@@ -57,14 +57,14 @@ function M.to_html(filename, out_filename)
 
   -- Iterate over defined styles and convert them into CSS.
   html[#html + 1] = '<style type="text/css">'
-  for i = 1, buffer.STYLE_MAX do
+  for i = 1, view.STYLE_MAX do
     local name = buffer:name_of_style(i)
     if name == 'Not Available' then goto continue end
     local style = {}
     -- Determine style properties.
-    local style_def = buffer.property_expanded['style.' .. name]
+    local style_def = view.property_expanded['style.' .. name]
     style_def = style_def:gsub('%%(%b())', function(prop)
-      return buffer.property_expanded[prop:sub(2, -2)]
+      return view.property_expanded[prop:sub(2, -2)]
     end)
     local font_size = style_def:match('size:(%d+)')
     local fore_color = style_def:match('fore:([^,]+)')

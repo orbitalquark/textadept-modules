@@ -55,10 +55,10 @@ function ui.command_entry.open_file()
       if lfs.attributes(dir, 'mode') == 'directory' then
         -- Iterate over directory, finding file matches.
         local patt = '^' .. part:gsub('(%p)', '%%%1')
-        lfs.dir_foreach(dir, function(file)
-          file = file:match('[^/\\]+[/\\]?$')
-          if file:find(patt) then files[#files + 1] = file end
-        end, nil, 0, true)
+        for filename in lfs.walk(dir, nil, 0, true) do
+          filename = filename:match('[^/\\]+[/\\]?$')
+          if filename:find(patt) then files[#files + 1] = filename end
+        end
         table.sort(files)
         local sep = ui.command_entry.auto_c_separator
         ui.command_entry.auto_c_separator = string.byte(';')

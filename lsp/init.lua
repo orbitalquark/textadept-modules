@@ -616,7 +616,7 @@ function M.hover(position)
       contents = contents.value or table.concat(contents, '\n')
     end
     if contents == '' then return end
-    buffer:call_tip_show(position or buffer.current_pos, contents)
+    view:call_tip_show(position or buffer.current_pos, contents)
   end
 end
 
@@ -626,7 +626,7 @@ local signatures
 -- If a call tip is already shown, cycles to the next one if it exists.
 -- @name signature_help
 function M.signature_help()
-  if buffer:call_tip_active() then events.emit(events.CALL_TIP_CLICK) return end
+  if view:call_tip_active() then events.emit(events.CALL_TIP_CLICK) return end
   local server = servers[buffer:get_lexer()]
   if server and buffer.filename and
      server.capabilities.signatureHelpProvider then
@@ -657,7 +657,7 @@ function M.signature_help()
       if #signatures > 1 then doc = '\001' .. doc:gsub('\n', '\n\002', 1) end
       signatures[i] = doc
     end
-    buffer:call_tip_show(buffer.current_pos, signatures[signatures.active])
+    view:call_tip_show(buffer.current_pos, signatures[signatures.active])
   end
 end
 -- Cycle through signatures.
@@ -673,7 +673,7 @@ events.connect(events.CALL_TIP_CLICK, function(position)
     elseif signatures.active < 1 then
       signatures.active = #signatures
     end
-    buffer:call_tip_show(buffer.current_pos, signatures[signatures.active])
+    view:call_tip_show(buffer.current_pos, signatures[signatures.active])
   end
 end)
 
@@ -787,15 +787,15 @@ end)
 events.connect(events.DWELL_END, function()
   if not buffer.get_lexer then return end
   local server = servers[buffer:get_lexer()]
-  if server then buffer:call_tip_cancel() end
+  if server then view:call_tip_cancel() end
 end)
 
 -- Set diagnostic indicator styles.
 events.connect(events.VIEW_NEW, function()
   view.indic_style[M.INDIC_WARN] = view.INDIC_SQUIGGLE
-  view.indic_fore[M.INDIC_WARN] = buffer.property_int['color.yellow']
+  view.indic_fore[M.INDIC_WARN] = view.property_int['color.yellow']
   view.indic_style[M.INDIC_ERROR] = view.INDIC_SQUIGGLE
-  view.indic_fore[M.INDIC_ERROR] = buffer.property_int['color.red']
+  view.indic_fore[M.INDIC_ERROR] = view.property_int['color.red']
 end)
 
 -- Gracefully shutdown language servers on reset. They will be restarted as

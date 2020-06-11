@@ -61,7 +61,7 @@ local M = {}
 module('file_diff')]]
 
 M.theme = 'light'
-local bg_color = buffer.property_expanded['style.default']:match('back:([^,]+)')
+local bg_color = view.property_expanded['style.default']:match('back:([^,]+)')
 if bg_color and tonumber(bg_color) < 0x808080 then M.theme = 'dark' end
 
 M.MARK_ADDITION = _SCINTILLA.next_marker_number()
@@ -382,7 +382,7 @@ function M.goto_change(next)
       buffer:goto_line(line2)
     end
   end
-  view:vertical_centre_caret()
+  view:vertical_center_caret()
 end
 
 ---
@@ -491,14 +491,14 @@ events.connect(events.VIEW_NEW, function()
   }
   for mark, color in pairs(markers) do
     view:marker_define(mark, view.MARK_BACKGROUND)
-    view.marker_back[mark] = buffer.property_int['color.' .. color]
+    view.marker_back[mark] = view.property_int['color.' .. color]
   end
   local indicators = {
     [INDIC_ADDITION] = M.theme .. '_green', [INDIC_DELETION] = M.theme .. '_red'
   }
   for indic, color in pairs(indicators) do
     view.indic_style[indic] = view.INDIC_FULLBOX
-    view.indic_fore[indic] = buffer.property_int['color.' .. color]
+    view.indic_fore[indic] = view.property_int['color.' .. color]
     view.indic_alpha[indic], view.indic_under[indic] = 255, true
   end
 end)

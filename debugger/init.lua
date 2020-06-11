@@ -146,7 +146,7 @@ local M = {}
 -- @field _G.events.DEBUGGER_INSPECT (string)
 --   Emitted when a symbol should be inspected.
 --   Debuggers typically show a symbol's value in a calltip via
---   [`buffer:call_tip_show()`]().
+--   [`view:call_tip_show()`]().
 --   This is only emitted when the debugger is running and paused (e.g. at a
 --   breakpoint).
 --   Arguments:
@@ -688,7 +688,7 @@ end)
 
 -- Inspect symbols and show call tips during mouse dwell events.
 events.connect(events.DWELL_START, function(pos) M.inspect(pos) end)
-events.connect(events.DWELL_END, buffer.call_tip_cancel)
+events.connect(events.DWELL_END, view.call_tip_cancel)
 
 -- Add menu entries and configure key bindings.
 -- (Insert 'Debug' menu after 'Tools'.)

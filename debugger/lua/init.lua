@@ -189,7 +189,7 @@ events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
   local line_part = buffer:text_range(s, e)
   local symbol = line_part:match('[%w_%.]+$')
   handle('eval ' .. symbol, function(value)
-    buffer:call_tip_show(pos, string.format('%s = %s', symbol, value))
+    view:call_tip_show(pos, string.format('%s = %s', symbol, value))
   end)
 end)
 

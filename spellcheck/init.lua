@@ -202,7 +202,7 @@ function M.check_spelling(interactive, wrapped)
     -- ranges depend on accurate styling.
     if i > buffer.end_styled then
       local next_page = buffer:line_from_position(i) + view.lines_on_screen
-      buffer:colourise(buffer.end_styled, buffer.line_end_position[next_page])
+      buffer:colorize(buffer.end_styled, buffer.line_end_position[next_page])
     end
     local style = style_at[i]
     if spellcheckable_styles[style] == nil then
@@ -249,7 +249,7 @@ end)
 local function set_properties()
   view.indic_style[M.INDIC_SPELLING] = not CURSES and view.INDIC_DIAGONAL or
     view.INDIC_STRAIGHTBOX
-  view.indic_fore[M.INDIC_SPELLING] = buffer.property_int['color.red']
+  view.indic_fore[M.INDIC_SPELLING] = view.property_int['color.red']
 end
 events.connect(events.VIEW_NEW, set_properties)
 events.connect(events.BUFFER_NEW, set_properties)

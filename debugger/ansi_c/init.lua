@@ -188,7 +188,7 @@ events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
   local output = run_command('-data-evaluate-expression ' .. symbol)
   local value = output:match('value="(.*)"')
   if value then
-    buffer:call_tip_show(pos, string.format('%s = %s', symbol, value))
+    view:call_tip_show(pos, string.format('%s = %s', symbol, value))
   end
 end)
 
