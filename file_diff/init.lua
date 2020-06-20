@@ -145,6 +145,12 @@ local function synchronize()
   ui.goto_view(view == view2 and view1 or view2)
 end
 
+local function count_lines(text)
+  local lines = 1
+  for _ in text:gmatch('\n') do lines = lines + 1 end
+  return lines
+end
+
 -- Mark the differences between the two buffers.
 local function mark_changes()
   if not _VIEWS[view1] or not _VIEWS[view2] then return end
@@ -153,86 +159,134 @@ local function mark_changes()
   -- Perform the diff.
   local diffs = diff(buffer1:get_text(), buffer2:get_text())
   -- Parse the diff, marking modified lines and changed text.
-  --print('---')
   local pos1, pos2 = 1, 1
   for i = 1, #diffs, 2 do
     local op, text = diffs[i], diffs[i + 1]
     local text_len = #text
     if op == DELETE then
-      -- Count the number of lines deleted.
-      local num_lines = 1
-      for _ in text:gmatch('\n') do num_lines = num_lines + 1 end
-      if num_lines > 1 then
-        -- Mark deleted lines (full ones only).
-        local line_start = buffer1:line_from_position(pos1)
-        local line_end = buffer1:line_from_position(pos1 + text_len)
-        for j = line_start, line_end do
-          if buffer1.line_end_position[j] ~= pos1 and
-             buffer1:position_from_line(j) ~= pos1 + text_len then
-            buffer1:marker_add(j, MARK_DELETION)
-          end
+      local next_op, next_text = diffs[i + 2], diffs[i + 3]
+      -- Mark partial lines as modified and full lines as deleted.
+      local start_line = buffer1:line_from_position(pos1)
+      local end_line = buffer1:line_from_position(pos1 + text_len)
+      local mark = MARK_MODIFICATION -- assume partial initially
+      if next_op ~= INSERT then
+        -- Deleting full line(s), either from line start to next line(s) start,
+        -- or from line end to next line(s) end. Adjust `start_line` and
+        -- `end_line` accordingly for accurate line markers.
+        if pos1 == buffer1:position_from_line(start_line) and
+           pos1 + text_len == buffer1:position_from_line(end_line) then
+          mark = MARK_DELETION
+          end_line = end_line - 1
+        elseif pos1 == buffer1.line_end_position[start_line] and
+               pos1 + text_len == buffer1.line_end_position[end_line] then
+          mark = MARK_DELETION
+          start_line = start_line + 1
         end
-      else
-        -- Mark changed line and highlight deletion.
-        buffer1:marker_add(buffer1:line_from_position(pos1), MARK_MODIFICATION)
-        buffer2:marker_add(buffer2:line_from_position(pos2), MARK_MODIFICATION)
+      end
+      for j = start_line, end_line do buffer1:marker_add(j, mark) end
+      -- Highlight deletion from partially changed line(s) and mark other line
+      -- as modified.
+      if mark == MARK_MODIFICATION then
         buffer1.indicator_current = INDIC_DELETION
         buffer1:indicator_fill_range(pos1, text_len)
+        buffer2:marker_add(buffer2:line_from_position(pos2), mark)
       end
       pos1 = pos1 + text_len
-      -- Fill in empty space in the other buffer.
-      if num_lines > 1 then
-        local line = buffer2:line_from_position(pos2) - 1
-        local blanks = string.rep('\n', num_lines - 2)
-        if line < 1 then line = 1 end
-        if line == 1 and buffer2.annotation_text[line] ~= '' then
-          -- Add to existing empty space under the first line in buffer2.
-          blanks = string.format(
-            '%s\n%s', buffer2.annotation_text[line], blanks)
+      -- Calculate net change in lines and fill in empty space in either buffer
+      -- with annotations if necessary.
+      if next_op == INSERT then
+        -- Deleting line(s) in favor of other lines. If those other lines are
+        -- more numerous, then fill empty space in this buffer.
+        local num_lines = count_lines(text)
+        local next_num_lines = count_lines(next_text)
+        if num_lines < next_num_lines then
+          local annotation_lines = next_num_lines - num_lines - 1
+          local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+          buffer1.annotation_text[end_line] = annotation_text
         end
-        buffer2.annotation_text[line] = blanks
+      elseif mark == MARK_DELETION then
+        -- Deleting full line(s) with no replacement, so fill empty space in
+        -- other buffer.
+        local offset = not text:find('^\n') and 1 or 0
+        local line = math.max(buffer2:line_from_position(pos2) - offset, 1)
+        local annotation_lines = end_line - start_line
+        local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+        buffer2.annotation_text[line] = annotation_text
+      else
+        -- Deleting partial line(s) with no replacement, so fill empty space in
+        -- other buffer.
+        local extra_lines = count_lines(text) - 1
+        if extra_lines > 0 then
+          local line = buffer2:line_from_position(pos2)
+          local annotation_lines = extra_lines - 1
+          local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+          buffer2.annotation_text[line] = annotation_text
+        end
       end
     elseif op == INSERT then
-      local num_lines = 1
-      for _ in text:gmatch('\n') do num_lines = num_lines + 1 end
-      if num_lines > 1 then
-        -- Mark added lines (full ones only).
-        local line_start = buffer2:line_from_position(pos2)
-        local line_end = buffer2:line_from_position(pos2 + text_len)
-        for j = line_start, line_end do
-          if buffer2.line_end_position[j] ~= pos2 and
-             buffer2:position_from_line(j) ~= pos2 + text_len then
-            buffer2:marker_add(j, MARK_ADDITION)
-          end
+      local prev_op, prev_text = diffs[i - 2], diffs[i - 1]
+      -- Mark partial lines as modified and full lines as deleted.
+      local start_line = buffer2:line_from_position(pos2)
+      local end_line = buffer2:line_from_position(pos2 + text_len)
+      local mark = MARK_MODIFICATION -- assume partial initially
+      if next_op ~= DELETE then
+        -- Adding full line(s), either from line start to next line(s) start, or
+        -- from line end to next line(s) end. Adjust `start_line` and `end_line`
+        -- accordingly for accurate line markers.
+        if pos2 == buffer2:position_from_line(start_line) and
+           pos2 + text_len == buffer2:position_from_line(end_line) then
+          mark = MARK_ADDITION
+          end_line = end_line - 1
+        elseif pos2 == buffer2.line_end_position[start_line] and
+               pos2 + text_len == buffer2.line_end_position[end_line] then
+          mark = MARK_ADDITION
+          start_line = start_line + 1
         end
-      else
-        -- Mark changed line and highlight addition.
-        buffer2:marker_add(buffer2:line_from_position(pos2), MARK_MODIFICATION)
-        buffer1:marker_add(buffer1:line_from_position(pos1), MARK_MODIFICATION)
+      end
+      for j = start_line, end_line do buffer2:marker_add(j, mark) end
+      -- Highlight addition from partially changed line(s) and mark other line
+      -- as modified.
+      if mark == MARK_MODIFICATION then
         buffer2.indicator_current = INDIC_ADDITION
         buffer2:indicator_fill_range(pos2, text_len)
+        buffer1:marker_add(buffer1:line_from_position(pos1), mark)
       end
       pos2 = pos2 + text_len
-      -- Fill in empty space in the other buffer.
-      if num_lines > 1 then
-        local line = buffer1:line_from_position(pos1) - 1
-        local blanks = string.rep('\n', num_lines - 2)
-        if line < 1 then line = 1 end
-        if line == 1 and buffer1.annotation_text[line] ~= '' then
-          -- Add to existing empty space under the first line in buffer1.
-          blanks = string.format(
-            '%s\n%s', buffer1.annotation_text[line], blanks)
+      -- Calculate net change in lines and fill in empty space in either buffer
+      -- with annotations if necessary.
+      if prev_op == DELETE then
+        -- Adding line(s) in favor of other lines. If those other lines are
+        -- more numerous, then fill empty space in this buffer.
+        local num_lines = count_lines(text)
+        local prev_num_lines = count_lines(prev_text)
+        if num_lines < prev_num_lines then
+          local annotation_lines = prev_num_lines - num_lines - 1
+          local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+          buffer2.annotation_text[end_line] = annotation_text
         end
-        buffer1.annotation_text[line] = blanks
+      elseif mark == MARK_ADDITION then
+        -- Adding full line(s) with no replacement, so fill empty space in other
+        -- buffer.
+        local offset = not text:find('^\n') and 1 or 0
+        local line = math.max(buffer1:line_from_position(pos1) - offset, 1)
+        local annotation_lines = end_line - start_line
+        local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+        buffer1.annotation_text[line] = annotation_text
+      else
+        -- Adding partial line(s) with no replacement, so fill empty space in
+        -- other buffer.
+        local extra_lines = count_lines(text) - 1
+        if extra_lines > 0 then
+          local line = buffer1:line_from_position(pos1)
+          local annotation_lines = extra_lines - 1
+          local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+          buffer1.annotation_text[line] = annotation_text
+        end
       end
     else
       pos1, pos2 = pos1 + text_len, pos2 + text_len
     end
-    --text = text:gsub('\n', '\\n')
-    --if #text > 70 then text = text:sub(1, 30) .. ' ... ' .. text:sub(-30) end
-    --print(op, '"' .. text .. '"')
   end
-  --for i = 0, buffer.line_count do print(buffer:marker_get(i)) end
   synchronize()
 end
 
@@ -321,9 +375,11 @@ function M.goto_change(next)
   local step = next and 1 or -1
   if view == view1 then
     line1 = buffer:line_from_position(buffer.current_pos) + step
+    if line1 < 1 then line1 = 1 end
     line2 = get_synchronized_line(line1)
   else
     line2 = buffer:line_from_position(buffer.current_pos) + step
+    if line2 < 1 then line2 = 1 end
     line1 = get_synchronized_line(line2)
   end
   -- Search for the next change or set of changes, wrapping as necessary.
@@ -394,16 +450,16 @@ function M.merge(left)
   if not _VIEWS[view1] or not _VIEWS[view2] then return end
   local buffer1, buffer2 = view1.buffer, view2.buffer
   -- Determine whether or not there is a change to merge.
-  local line_start = buffer:line_from_position(buffer.current_pos)
-  local line_end = line_start + 1
+  local start_line = buffer:line_from_position(buffer.current_pos)
+  local end_line = start_line + 1
   local diff_marker = 1 << MARK_ADDITION - 1 | 1 << MARK_DELETION - 1 |
     1 << MARK_MODIFICATION - 1
-  local marker = buffer:marker_get(line_start) & diff_marker
+  local marker = buffer:marker_get(start_line) & diff_marker
   if marker == 0 then
     -- Look for additions or deletions from the other buffer, which are offset
     -- one line down (side-effect of Scintilla's visible line -> doc line
     -- conversions).
-    local line = get_synchronized_line(line_start) + 1
+    local line = get_synchronized_line(start_line) + 1
     if (view == view1 and buffer2 or buffer1):marker_get(line) &
        diff_marker > 0 then
       ui.goto_view(view == view1 and view2 or view1)
@@ -414,19 +470,19 @@ function M.merge(left)
     return
   end
   -- Determine the bounds of the change target it.
-  while buffer:marker_get(line_start - 1) & diff_marker == marker do
-    line_start = line_start - 1
+  while buffer:marker_get(start_line - 1) & diff_marker == marker do
+    start_line = start_line - 1
   end
-  buffer.target_start = buffer:position_from_line(line_start)
-  while buffer:marker_get(line_end) & diff_marker == marker do
-    line_end = line_end + 1
+  buffer.target_start = buffer:position_from_line(start_line)
+  while buffer:marker_get(end_line) & diff_marker == marker do
+    end_line = end_line + 1
   end
-  buffer.target_end = buffer:position_from_line(line_end)
+  buffer.target_end = buffer:position_from_line(end_line)
   -- Perform the merge, depending on context.
   if marker == 1 << MARK_ADDITION - 1 then
     if left then
       -- Merge addition from right to left.
-      local line = get_synchronized_line(line_end)
+      local line = get_synchronized_line(end_line)
       buffer1:insert_text(buffer1:position_from_line(line), buffer2.target_text)
     else
       -- Merge "deletion" (empty text) from left to right.
@@ -438,16 +494,17 @@ function M.merge(left)
       buffer1:replace_target('')
     else
       -- Merge deletion from left to right.
-      local line = get_synchronized_line(line_end)
+      local line = get_synchronized_line(end_line)
       buffer2:insert_text(buffer2:position_from_line(line), buffer1.target_text)
     end
   elseif marker == 1 << MARK_MODIFICATION - 1 then
     local target_text = buffer.target_text
-    line_start = get_synchronized_line(line_start)
-    line_end = get_synchronized_line(line_end)
+    start_line = get_synchronized_line(start_line)
+    end_line = get_synchronized_line(end_line)
     ui.goto_view(view == view1 and view2 or view1)
-    buffer.target_start = buffer:position_from_line(line_start)
-    buffer.target_end = buffer:position_from_line(line_end)
+    if buffer.annotation_text[end_line] ~= '' then end_line = end_line + 1 end
+    buffer.target_start = buffer:position_from_line(start_line)
+    buffer.target_end = buffer:position_from_line(end_line)
     if view == view2 and left or view == view1 and not left then
       -- Merge change from opposite view.
       target_text = buffer.target_text
