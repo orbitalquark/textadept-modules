@@ -42,8 +42,8 @@
 --     ctags.ctags_flags['/path/to/project'] = ctags.LUA_FLAGS
 --     table.insert(textadept.editing.api_files.lua, '/path/to/project/api')
 --
---     -- Use Textadept's tags and api generator, which depends on LuaDoc[1]
---     -- being installed.
+--     -- Use Textadept's tags and api generator, which depends on LuaDoc
+--     -- (http://keplerproject.github.io/luadoc/) being installed.
 --     ctags.ctags_flags['/path/to/project'] = ctags.LUA_GENERATOR
 --     ctags.api_commands['/path/to/project'] = ctags.LUA_GENERATOR
 --     table.insert(require('lua').tags, '/path/to/project/tags')
@@ -51,8 +51,6 @@
 --
 -- Then, invoking Search > Ctags > Generate Project Tags and API menu item will
 -- generate the tags and api files.
---
--- [1]: http://keplerproject.github.io/luadoc/
 --
 -- ## Key Bindings
 --
@@ -112,10 +110,10 @@ M.api_commands = {}
 M.LUA_FLAGS = table.concat({
   '--langdef=luax',
   '--langmap=luax:.lua',
-  [[--regex-luax="/^\s*function\s+[^[:space:]\.]*\.?([[:alnum:]_]+)\(/\1/f/"]],
+  [[--regex-luax="/^\s*function\s+([[:alnum:]_]+[.:])*([[:alnum:]_]+)\(/\2/f/"]],
   [[--regex-luax="/^\s*local\s+function\s+([[:alnum:]_]+)\(/\1/F/"]],
-  [[--regex-luax="/^[^[:space:]\.]*\.?([[:alnum:]_]+)\s*=\s*[{]/\1/t/"]]
-})
+  [[--regex-luax="/^([[:alnum:]_]+\.)*([[:alnum:]_]+)\s*=\s*[{]/\2/t/"]]
+}, ' ')
 
 M.LUA_GENERATOR = 'LUA_GENERATOR'
 
