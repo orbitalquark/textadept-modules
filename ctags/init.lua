@@ -10,22 +10,49 @@
 --
 -- There are four ways to tell Textadept about *tags* files:
 --
---   1. Place a *tags* file in current file's directory. This file will be used
---      in a tag search from any file in that directory.
---   2. Place a *tags* file in a project's root directory. This file will be
+--   1. Place a *tags* file in a project's root directory. This file will be
 --      used in a tag search from any of that project's source files.
---   3. Add a *tags* file or list of *tags* files to the [`ctags`]() module for
+--   2. Add a *tags* file or list of *tags* files to the [`ctags`]() module for
 --      a project root key. This file(s) will be used in a tag search from any
 --      of that project's source files.
 --      For example: `ctags['/path/to/project'] = '/path/to/tags'`.
---   4. Add a *tags* file to the [`ctags`]() module. This file will be used in
+--   3. Add a *tags* file to the [`ctags`]() module. This file will be used in
 --      any tag search.
 --      For example: `ctags[#ctags + 1] = '/path/to/tags'`.
---   5. As a last resort, if no *tags* files were found, or if there is no match
+--   4. As a last resort, if no *tags* files were found, or if there is no match
 --      for a given symbol, a temporary *tags* file is generated for the current
 --      file and used.
 --
 -- Textadept will use any and all *tags* files based on the above rules.
+--
+-- ## Generating Ctags and API Documentation
+--
+-- This module can also help generate Ctags files and API documentation files
+-- that can be read by Textadept. This is typically configured per-project.
+-- For example, a C project might want to generate tags and API documentation
+-- for all files and subdirectories in a *src/* directory:
+--
+--     ctags.ctags_flags['/path/to/project'] = '-R src/'
+--     table.insert(textadept.editing.api_files.ansi_c, '/path/to/project/api')
+--
+-- A Lua project has a couple of options for generating tags and API
+-- documentation:
+--
+--     -- Use ctags with some custom flags for improved Lua parsing.
+--     ctags.ctags_flags['/path/to/project'] = ctags.LUA_FLAGS
+--     table.insert(textadept.editing.api_files.lua, '/path/to/project/api')
+--
+--     -- Use Textadept's tags and api generator, which depends on LuaDoc[1]
+--     -- being installed.
+--     ctags.ctags_flags['/path/to/project'] = ctags.LUA_GENERATOR
+--     ctags.api_commands['/path/to/project'] = ctags.LUA_GENERATOR
+--     table.insert(require('lua').tags, '/path/to/project/tags')
+--     table.insert(textadept.editing.api_files.lua, '/path/to/project/api')
+--
+-- Then, invoking Search > Ctags > Generate Project Tags and API menu item will
+-- generate the tags and api files.
+--
+-- [1]: http://keplerproject.github.io/luadoc/
 --
 -- ## Key Bindings
 --
@@ -124,21 +151,15 @@ local function find_tags(tag)
     for i = 1, #tag_files do if tag_files[i] == file then return end end
     tag_files[#tag_files + 1] = file
   end
-  local tag_file =
-    ((buffer.filename or ''):match('^.+[/\\]') or lfs.currentdir() .. '/') ..
-    'tags' -- current directory's tags
-  if lfs.attributes(tag_file) then add_tag_file(tag_file) end
-  if buffer.filename then
-    local root = io.get_project_root(buffer.filename)
-    if root then
-      tag_file = root .. '/tags' -- project's tags
-      if lfs.attributes(tag_file) then add_tag_file(tag_file) end
-      tag_file = M[root] -- project's specified tags
-      if type(tag_file) == 'string' then
-        add_tag_file(tag_file)
-      elseif type(tag_file) == 'table' then
-        for i = 1, #tag_file do add_tag_file(tag_file[i]) end
-      end
+  local root = io.get_project_root()
+  if root then
+    local tag_file = root .. '/tags' -- project's tags
+    if lfs.attributes(tag_file) then add_tag_file(tag_file) end
+    tag_file = M[root] -- project's specified tags
+    if type(tag_file) == 'string' then
+      add_tag_file(tag_file)
+    elseif type(tag_file) == 'table' then
+      for i = 1, #tag_file do add_tag_file(tag_file[i]) end
     end
   end
   for i = 1, #M do add_tag_file(M[i]) end -- global tags
@@ -260,7 +281,7 @@ m_search[#m_search + 1] = {
   {_L['Goto Ctag'], M.goto_tag},
   {_L['Goto Ctag...'], function()
     local button, name = ui.dialogs.standard_inputbox{title = _L['Goto Tag']}
-    if button == 1 then _M.ctags.goto_tag(name) end
+    if button == 1 then M.goto_tag(name) end
   end},
   SEPARATOR,
   {_L['Autocomplete Tag'], function()
