@@ -156,7 +156,8 @@ events.connect(events.DEBUGGER_STOP, function(lexer)
   client = nil
   if proc and proc:status() ~= 'terminated' then proc:kill() end
   proc = nil
-  -- TODO: close server on Textadept exit?
+  server:close()
+  server = nil
 end)
 
 -- Add and remove breakpoints and watches.
