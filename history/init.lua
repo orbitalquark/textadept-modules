@@ -26,8 +26,10 @@ local M = {}
 --
 -- @field minimum_line_distance (number)
 --   The minimum number of lines between distinct history records.
+--   The default value is `3`.
 -- @field maximum_history_size (number)
 --   The maximum number of history records to keep per view.
+--   The default value is `100`.
 module('history')]]
 
 M.minimum_line_distance = 3
@@ -88,7 +90,7 @@ end
 -- @name disable_listening
 function M.disable_listening()
   events.disconnect(events.MODIFIED, record_edit_location)
-  for _, history in pairs(view_history) do history = {pos = 0} end -- clear
+  for view in pairs(view_history) do view_history[view] = {pos = 0} end -- clear
 end
 
 -- Jumps to the current position in the current view's history.
