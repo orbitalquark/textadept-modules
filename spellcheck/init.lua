@@ -143,7 +143,7 @@ events.connect(events.USER_LIST_SELECTION, function(id, text, position)
       io.open(user_dict, 'wb'):write(table.concat(words, '\n')):close()
     end
     M.spellchecker:add_word(buffer:text_range(s, e))
-    M.check_spelling()
+    M.check_spelling() -- clear highlighting for all occurrences
   end
 end)
 
@@ -214,14 +214,14 @@ function M.check_spelling(interactive, wrapped)
       local j = i + 1
       while j <= buffer.length and style_at[j] == style do j = j + 1 end
       for e, s, word in lpeg_gmatch(word_patt, buffer:text_range(i, j)) do
-        if not M.spellchecker:spell(word) then
-          buffer:indicator_fill_range(i + s - 1, e - s)
-          if interactive then
-            buffer:goto_pos(i + s - 1)
-            show_suggestions(word)
-            return
-          end
+        if M.spellchecker:spell(word) then goto continue end
+        buffer:indicator_fill_range(i + s - 1, e - s)
+        if interactive then
+          buffer:goto_pos(i + s - 1)
+          show_suggestions(word)
+          return
         end
+        ::continue::
       end
       i = j
     else
