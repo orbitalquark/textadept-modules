@@ -62,7 +62,9 @@ module('file_diff')]]
 
 M.theme = 'light'
 local bg_color = view.property_expanded['style.default']:match('back:([^,]+)')
-if bg_color and tonumber(bg_color) < 0x808080 then M.theme = 'dark' end
+if bg_color and tonumber(bg_color) < 0x808080 and not CURSES then
+  M.theme = 'dark'
+end
 
 M.MARK_ADDITION = _SCINTILLA.next_marker_number()
 M.MARK_DELETION = _SCINTILLA.next_marker_number()
@@ -145,6 +147,7 @@ local function synchronize()
   ui.goto_view(view == view2 and view1 or view2)
 end
 
+-- Returns the number of lines contained in the given string.
 local function count_lines(text)
   local lines = 1
   for _ in text:gmatch('\n') do lines = lines + 1 end
@@ -339,6 +342,7 @@ end
 
 -- Stops comparing.
 local function stop()
+  if not _VIEWS[view1] or not _VIEWS[view2] then return end
   clear_marked_changes()
   view1, view2 = nil, nil
 end
