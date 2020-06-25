@@ -204,7 +204,8 @@ local function mark_changes()
         local next_num_lines = count_lines(next_text)
         if num_lines < next_num_lines then
           local annotation_lines = next_num_lines - num_lines - 1
-          local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+          local annotation_text = ' ' .. string.rep(
+            '\n', annotation_lines + buffer1.annotation_lines[end_line])
           buffer1.annotation_text[end_line] = annotation_text
         end
       elseif mark == MARK_DELETION then
@@ -232,7 +233,7 @@ local function mark_changes()
       local start_line = buffer2:line_from_position(pos2)
       local end_line = buffer2:line_from_position(pos2 + text_len)
       local mark = MARK_MODIFICATION -- assume partial initially
-      if next_op ~= DELETE then
+      if prev_op ~= DELETE then
         -- Adding full line(s), either from line start to next line(s) start, or
         -- from line end to next line(s) end. Adjust `start_line` and `end_line`
         -- accordingly for accurate line markers.
@@ -264,7 +265,8 @@ local function mark_changes()
         local prev_num_lines = count_lines(prev_text)
         if num_lines < prev_num_lines then
           local annotation_lines = prev_num_lines - num_lines - 1
-          local annotation_text = ' ' .. string.rep('\n', annotation_lines)
+          local annotation_text = ' ' .. string.rep(
+            '\n', annotation_lines + buffer2.annotation_lines[end_line])
           buffer2.annotation_text[end_line] = annotation_text
         end
       elseif mark == MARK_ADDITION then
