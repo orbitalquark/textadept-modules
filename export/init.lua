@@ -66,6 +66,16 @@ function M.to_html(filename, out_filename)
     style_def = style_def:gsub('%%(%b())', function(prop)
       return view.property_expanded[prop:sub(2, -2)]
     end)
+    if style_def == '' then
+      style_def = table.concat({
+        string.format('size:%d', view.style_size[i]),
+        string.format('fore:%s', view.style_fore[i]),
+        string.format('back:%s', view.style_back[i]),
+        view.style_bold[i] and 'bold' or 'notbold',
+        view.style_italic[i] and 'italics' or 'notitalics',
+        view.style_underline[i] and 'underlined' or 'notunderlined'
+      }, ',')
+    end
     local font_size = style_def:match('size:(%d+)')
     local fore_color = style_def:match('fore:([^,]+)')
     local back_color = style_def:match('back:([^,]+)')
