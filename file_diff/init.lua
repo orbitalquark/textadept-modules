@@ -135,8 +135,10 @@ local function clear_marked_changes()
   if buffer2 then buffer2:annotation_clear_all() end
 end
 
+local synchronizing = false
 -- Synchronize the scroll and line position of the other buffer.
 local function synchronize()
+  synchronizing = true
   local line = buffer:line_from_position(buffer.current_pos)
   local visible_line = view:visible_from_doc_line(line)
   local first_visible_line = view.first_visible_line
@@ -145,6 +147,7 @@ local function synchronize()
   buffer:goto_line(view:doc_line_from_visible(visible_line))
   view.first_visible_line, view.x_offset = first_visible_line, x_offset
   ui.goto_view(view == view2 and view1 or view2)
+  synchronizing = false
 end
 
 -- Returns the number of lines contained in the given string.
@@ -528,15 +531,12 @@ end
 -- TODO: connect to these in `start()` and disconnect in `stop()`?
 
 -- Ensure the diff buffers are scrolled in sync.
-local synchronizing = false
 events.connect(events.UPDATE_UI, function(updated)
   if _VIEWS[view1] and _VIEWS[view2] and updated and not synchronizing then
     if updated &
        (view.UPDATE_H_SCROLL | view.UPDATE_V_SCROLL |
          buffer.UPDATE_SELECTION) > 0 then
-      synchronizing = true
       synchronize()
-      synchronizing = false
     end
   end
 end)
