@@ -324,6 +324,6 @@ m_search[#m_search + 1] = {
   end}
 }
 keys.f12 = M.goto_tag
-keys.sf12 = m_search[_L['Ctags']][_L['Goto Ctag...']][2]
+keys['shift+f12'] = m_search[_L['Ctags']][_L['Goto Ctag...']][2]
 
 return M

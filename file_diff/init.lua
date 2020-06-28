@@ -600,13 +600,13 @@ for i = 1, #m_tools - 1 do
 end
 local GUI = not CURSES
 keys.f6 = M.start
-keys.sf6 = m_tools[_L['Compare Files']][_L['Compare Buffers']][2]
-keys[GUI and 'adown' or 'mdown'] =
+keys['shift+f6'] = m_tools[_L['Compare Files']][_L['Compare Buffers']][2]
+keys[GUI and 'alt+down' or 'meta+down'] =
   m_tools[_L['Compare Files']][_L['Next Change']][2]
-keys[GUI and 'aup' or 'mup'] = M.goto_change
-keys[GUI and 'aleft' or 'mleft'] =
+keys[GUI and 'alt+up' or 'meta+up'] = M.goto_change
+keys[GUI and 'alt+left' or 'meta+left'] =
   m_tools[_L['Compare Files']][_L['Merge Left']][2]
-keys[GUI and 'aright' or 'mright'] = M.merge
+keys[GUI and 'alt+right' or 'meta+right'] = M.merge
 
 return M
 

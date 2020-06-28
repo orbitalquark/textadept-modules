@@ -279,7 +279,7 @@ for i = 1, #m_tools - 1 do
   end
 end
 keys.f7 = m_tools[_L['Spelling']][_L['Check Spelling...']][2]
-keys.sf7 = M.check_spelling
+keys['shift+f7'] = M.check_spelling
 
 return M
 

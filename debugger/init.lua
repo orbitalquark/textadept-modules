@@ -729,11 +729,11 @@ end
 keys.f5 = M.continue
 keys.f10 = M.step_over
 keys.f11 = M.step_into
-keys.sf11 = M.step_out
-keys.sf5 = M.stop
-keys[not OSX and not CURSES and 'a=' or 'm='] = M.inspect
+keys['shift+f11'] = M.step_out
+keys['shift+f5'] = M.stop
+keys[not CURSES and 'alt+=' or 'meta+='] = M.inspect
 local m_debug = textadept.menu.menubar[_L['Debug']]
-keys[not OSX and not CURSES and 'a+' or 'm+'] = m_debug[_L['Evaluate...']][2]
+keys[not CURSES and 'alt++' or 'meta++'] = m_debug[_L['Evaluate...']][2]
 keys.f9 = M.toggle_breakpoint
 
 -- Automatically load a language debugger when a file of that language is

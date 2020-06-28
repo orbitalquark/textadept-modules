@@ -180,7 +180,7 @@ m_edit[#m_edit + 1] = {
   {_L['Disable'], M.disable_listening},
   {_L['Enable'], M.enable_listening},
 }
-keys[not CURSES and (not OSX and 'a,' or 'c,') or 'm,'] = M.back
-keys[not CURSES and (not OSX and 'a.' or 'c.') or 'm.'] = M.forward
+keys[CURSES and 'meta+,' or OSX and 'ctrl+,' or 'alt+,'] = M.back
+keys[CURSES and 'meta+.' or OSX and 'ctrl+.' or 'alt+.'] = M.forward
 
 return M
