@@ -255,8 +255,8 @@ end
 -- @class table
 -- @name _G.keys.rest
 keys.rest = {
-  [not OSX and 'cag' or 'cmg'] = M.goto_section,
-  ['s\n'] = M.open_image,
+  [not OSX and 'ctrl+alt+g' or 'ctrl+cmd+g'] = M.goto_section,
+  ['shift+\n'] = M.open_image,
 }
 
 -- Snippets.

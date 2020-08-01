@@ -702,7 +702,7 @@ local function goto_definition(kind)
         local i = ui.dialogs.filteredlist{
           title = _L['Goto Definition'], columns = _L['Filename'], items = items
         }
-        if i == -1 then return true end -- definition found; user cancelled
+        if i == -1 then return true end -- definition found; user canceled
         location = location[i]
       end
     end

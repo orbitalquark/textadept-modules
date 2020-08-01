@@ -66,7 +66,7 @@ end
 -- @class table
 -- @name _G.keys.yaml
 keys.yaml = {
-  [not OSX and not CURSES and 'c&' or 'm&'] = M.goto_anchor
+  [CURSES and 'meta+&' or OSX and 'cmd+&' or 'ctrl+&'] = M.goto_anchor
 }
 
 -- Snippets.

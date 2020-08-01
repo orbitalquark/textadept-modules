@@ -234,8 +234,8 @@ end
 -- @class table
 -- @name _G.keys.ruby
 keys.ruby = {
-  ['s\n'] = M.try_to_autocomplete_end,
-  ['c{'] = M.toggle_block,
+  ['shift+\n'] = M.try_to_autocomplete_end,
+  ['ctrl+{'] = M.toggle_block,
 }
 
 -- Snippets.

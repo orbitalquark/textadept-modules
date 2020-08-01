@@ -134,7 +134,7 @@ end)
 -- @class table
 -- @name _G.keys.python
 keys.python = {
-  ['s\n'] = function()
+  ['shift+\n'] = function()
     buffer:line_end()
     buffer:add_text(':')
     buffer:new_line()
