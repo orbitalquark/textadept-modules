@@ -33,7 +33,7 @@ local M = {}
 --   up until the debugger starts.
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language to add a breakpoint for.
+--   * _`lang`_: The lexer name of the language to add a breakpoint for.
 --   * _`filename`_: The filename to add a breakpoint in.
 --   * _`line`_: The 1-based line number to break on.
 -- @field _G.events.DEBUGGER_BREAKPOINT_REMOVED (string)
@@ -42,7 +42,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`filename`_: The filename to remove a breakpoint from.
 --   * _`line`_: The 1-based line number to stop breaking on.
 -- @field _G.events.DEBUGGER_WATCH_ADDED (string)
@@ -52,7 +52,7 @@ local M = {}
 --   until the debugger starts.
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language to add a watch for.
+--   * _`lang`_: The lexer name of the language to add a watch for.
 --   * _`expr`_: The expression or variable to watch, depending on what the
 --     debugger supports.
 --   * _`id`_: The expression's ID number.
@@ -62,7 +62,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`expr`_: The expression to stop watching.
 --   * _`id`_: The expression's ID number.
 -- @field _G.events.DEBUGGER_START (string)
@@ -75,7 +75,7 @@ local M = {}
 --   not work. Listeners *must not* return `false` (they can return `nil`).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language to start debugging.
+--   * _`lang`_: The lexer name of the language to start debugging.
 --   * _`...`_: Any arguments passed to [`debugger.start()`]().
 -- @field _G.events.DEBUGGER_CONTINUE (string)
 --   Emitted when a execution should be continued.
@@ -83,7 +83,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`...`_: Any arguments passed to [`debugger.continue()`]().
 -- @field _G.events.DEBUGGER_STEP_INTO (string)
 --   Emitted when execution should continue by one line, stepping into
@@ -92,7 +92,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`...`_: Any arguments passed to [`debugger.step_into()`]().
 -- @field _G.events.DEBUGGER_STEP_OVER (string)
 --   Emitted when execution should continue by one line, stepping over
@@ -101,7 +101,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`...`_: Any arguments passed to [`debugger.step_over()`]().
 -- @field _G.events.DEBUGGER_STEP_OUT (string)
 --   Emitted when execution should continue, stepping out of the current
@@ -110,7 +110,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`...`_: Any arguments passed to [`debugger.step_out()`]().
 -- @field _G.events.DEBUGGER_PAUSE (string)
 --   Emitted when execution should be paused.
@@ -118,21 +118,21 @@ local M = {}
 --   at a breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`...`_: Any arguments passed to [`debugger.pause()`]().
 -- @field _G.events.DEBUGGER_RESTART (string)
 --   Emitted when execution should restart from the beginning.
 --   This is only emitted when the debugger is running.
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`...`_: Any arguments passed to [`debugger.restart()`]().
 -- @field _G.events.DEBUGGER_STOP (string)
 --   Emitted when a debugger should be stopped.
 --   This is only emitted when the debugger is running.
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language to stop debugging.
+--   * _`lang`_: The lexer name of the language to stop debugging.
 --   * _`...`_: Any arguments passed to [`debugger.stop()`]().
 -- @field _G.events.DEBUGGER_SET_FRAME (string)
 --   Emitted when a stack frame should be switched to.
@@ -140,7 +140,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`level`_: The 1-based stack level number to switch to. This value
 --     depends on the stack levels given to [`debugger.update_state()`]().
 -- @field _G.events.DEBUGGER_INSPECT (string)
@@ -151,7 +151,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`position`_: The buffer position of the symbol to inspect. The debugger
 --     responsible for identifying the symbol's name, as symbol characters vary
 --     from language to language.
@@ -161,7 +161,7 @@ local M = {}
 --   breakpoint).
 --   Arguments:
 --
---   * _`lexer`_: The lexer name of the language being debugged.
+--   * _`lang`_: The lexer name of the language being debugged.
 --   * _`text`_: The text of the command to run.
 -- @field MARK_BREAKPOINT_COLOR (number)
 --   The color of breakpoint markers.
@@ -254,9 +254,9 @@ local states = {}
 
 -- Notifies via the statusbar that debugging is happening.
 local function update_statusbar()
-  local lexer = buffer:get_lexer()
+  local lang = buffer:get_lexer()
   local status =
-    states[lexer] and _L[states[lexer].executing and 'executing' or 'paused'] or
+    states[lang] and _L[states[lang].executing and 'executing' or 'paused'] or
     '?'
   ui.statusbar_text = string.format('%s (%s)', _L['Debugging'], status)
 end
@@ -269,8 +269,8 @@ end
 -- @param file Filename to set the breakpoint in.
 -- @param line The 1-based line number to break on.
 local function set_breakpoint(file, line)
-  local lexer = buffer:get_lexer()
-  if states[lexer] and states[lexer].executing then
+  local lang = buffer:get_lexer()
+  if states[lang] and states[lang].executing then
     ui.dialogs.ok_msgbox{
       title = _L['Cannot Set Breakpoint'], text = _L['Debugger is executing'],
       informative_text = _L['Please wait until debugger is stopped or paused'],
@@ -278,12 +278,12 @@ local function set_breakpoint(file, line)
     }
     return
   end
-  if not breakpoints[lexer] then breakpoints[lexer] = {} end
-  if not breakpoints[lexer][file] then breakpoints[lexer][file] = {} end
-  breakpoints[lexer][file][line] = true
+  if not breakpoints[lang] then breakpoints[lang] = {} end
+  if not breakpoints[lang][file] then breakpoints[lang][file] = {} end
+  breakpoints[lang][file][line] = true
   if file == buffer.filename then buffer:marker_add(line, MARK_BREAKPOINT) end
-  if not states[lexer] then return end -- not debugging
-  events.emit(events.DEBUGGER_BREAKPOINT_ADDED, lexer, file, line)
+  if not states[lang] then return end -- not debugging
+  events.emit(events.DEBUGGER_BREAKPOINT_ADDED, lang, file, line)
 end
 
 ---
@@ -296,8 +296,8 @@ end
 -- @param line Optional 1-based line number of the breakpoint to remove.
 -- @name remove_breakpoint
 function M.remove_breakpoint(file, line)
-  local lexer = buffer:get_lexer()
-  if states[lexer] and states[lexer].executing then
+  local lang = buffer:get_lexer()
+  if states[lang] and states[lang].executing then
     ui.dialogs.ok_msgbox{
       title = _L['Cannot Remove Breakpoint'],
       text = _L['Debugger is executing'],
@@ -306,9 +306,9 @@ function M.remove_breakpoint(file, line)
     }
     return
   end
-  if (not file or not line) and breakpoints[lexer] then
+  if (not file or not line) and breakpoints[lang] then
     local items = {}
-    for filename, file_breakpoints in pairs(breakpoints[lexer]) do
+    for filename, file_breakpoints in pairs(breakpoints[lang]) do
       if not file or file == filename then
         for line in pairs(file_breakpoints) do
           items[#items + 1] = string.format('%s:%d', filename, line)
@@ -327,13 +327,13 @@ function M.remove_breakpoint(file, line)
     end
     return
   end
-  if breakpoints[lexer] and breakpoints[lexer][file] then
-    breakpoints[lexer][file][line] = nil
+  if breakpoints[lang] and breakpoints[lang][file] then
+    breakpoints[lang][file][line] = nil
     if file == buffer.filename then
       buffer:marker_delete(line, MARK_BREAKPOINT)
     end
-    if not states[lexer] then return end -- not debugging
-    events.emit(events.DEBUGGER_BREAKPOINT_REMOVED, lexer, file, line)
+    if not states[lang] then return end -- not debugging
+    events.emit(events.DEBUGGER_BREAKPOINT_REMOVED, lang, file, line)
   end
 end
 
@@ -349,12 +349,12 @@ end
 -- @see remove_breakpoint
 -- @name toggle_breakpoint
 function M.toggle_breakpoint(file, line)
-  local lexer = buffer:get_lexer()
+  local lang = buffer:get_lexer()
   if not file then file = buffer.filename end
   if not file then return end -- nothing to do
   if not line then line = buffer:line_from_position(buffer.current_pos) end
-  if not breakpoints[lexer] or not breakpoints[lexer][file] or
-     not breakpoints[lexer][file][line] then
+  if not breakpoints[lang] or not breakpoints[lang][file] or
+     not breakpoints[lang][file][line] then
     set_breakpoint(file, line)
   else
     M.remove_breakpoint(file, line)
@@ -370,8 +370,8 @@ end
 -- @param expr String expression to watch.
 -- @name set_watch
 function M.set_watch(expr)
-  local lexer = buffer:get_lexer()
-  if states[lexer] and states[lexer].executing then
+  local lang = buffer:get_lexer()
+  if states[lang] and states[lang].executing then
     ui.dialogs.ok_msgbox{
       title = _L['Cannot Set Watch'], text = _L['Debugger is executing'],
       informative_text = _L['Please wait until debugger is stopped or paused'],
@@ -386,12 +386,12 @@ function M.set_watch(expr)
     }
     if button ~= 1 or expr == '' then return end
   end
-  if not watches[lexer] then watches[lexer] = {n = 0} end
-  local watch_exprs = watches[lexer]
+  if not watches[lang] then watches[lang] = {n = 0} end
+  local watch_exprs = watches[lang]
   watch_exprs.n = watch_exprs.n + 1
   watch_exprs[watch_exprs.n], watch_exprs[expr] = expr, watch_exprs.n
-  if not states[lexer] then return end -- not debugging
-  events.emit(events.DEBUGGER_WATCH_ADDED, lexer, expr, watch_exprs.n)
+  if not states[lang] then return end -- not debugging
+  events.emit(events.DEBUGGER_WATCH_ADDED, lang, expr, watch_exprs.n)
 end
 
 ---
@@ -404,8 +404,8 @@ end
 --   event.
 -- @name remove_watch
 function M.remove_watch(id)
-  local lexer = buffer:get_lexer()
-  if states[lexer] and states[lexer].executing then
+  local lang = buffer:get_lexer()
+  if states[lang] and states[lang].executing then
     ui.dialogs.ok_msgbox{
       title = _L['Cannot Set Watch'], text = _L['Debugger is executing'],
       informative_text = _L['Please wait until debugger is stopped or paused'],
@@ -413,10 +413,10 @@ function M.remove_watch(id)
     }
     return
   end
-  if not id and watches[lexer] then
+  if not id and watches[lang] then
     local items = {}
-    for i = 1, watches[lexer].n do
-      local watch = watches[lexer][i]
+    for i = 1, watches[lang].n do
+      local watch = watches[lang][i]
       if watch then items[#items + 1] = watch end
     end
     local button, expr = ui.dialogs.filteredlist{
@@ -424,15 +424,15 @@ function M.remove_watch(id)
       string_output = true
     }
     if button ~= _L['OK'] or not expr then return end
-    id = watches[lexer][expr] -- TODO: handle duplicates
+    id = watches[lang][expr] -- TODO: handle duplicates
   end
-  local watch_exprs = watches[lexer]
+  local watch_exprs = watches[lang]
   if watch_exprs and watch_exprs[id] then
     local expr = watch_exprs[id]
     watch_exprs[id], watch_exprs[expr] = nil, nil
     -- TODO: handle duplicate exprs
-    if not states[lexer] then return end -- not debugging
-    events.emit(events.DEBUGGER_WATCH_REMOVED, lexer, expr, id)
+    if not states[lang] then return end -- not debugging
+    events.emit(events.DEBUGGER_WATCH_REMOVED, lang, expr, id)
   end
 end
 
@@ -443,14 +443,14 @@ end
 -- This only starts a debugger. [`debugger.continue()`](),
 -- [`debugger.step_into()`](), or [`debugger.step_over()`]() should be called
 -- next to begin debugging.
--- @param lexer Optional lexer name of the language to start debugging. The
---   default value is the current lexer.
+-- @param lang Optional lexer name of the language to start debugging. The
+--   default value is the name of the current lexer.
 -- @return whether or not a debugger was started
 -- @name start
-function M.start(lexer, ...)
-  if not lexer then lexer = buffer:get_lexer() end
-  if states[lexer] then return end -- already debugging
-  local ok, errmsg = pcall(events.emit, events.DEBUGGER_START, lexer, ...)
+function M.start(lang, ...)
+  if not lang then lang = buffer:get_lexer() end
+  if states[lang] then return end -- already debugging
+  local ok, errmsg = pcall(events.emit, events.DEBUGGER_START, lang, ...)
   if not ok then
     ui.dialogs.msgbox{
       title = _L['Error Starting Debugger'], text = errmsg,
@@ -460,17 +460,17 @@ function M.start(lexer, ...)
   elseif ok and not errmsg then
     return false -- no debugger for this language
   end
-  states[lexer] = {} -- initial value
-  if not breakpoints[lexer] then breakpoints[lexer] = {} end
-  for file, file_breakpoints in pairs(breakpoints[lexer]) do
+  states[lang] = {} -- initial value
+  if not breakpoints[lang] then breakpoints[lang] = {} end
+  for file, file_breakpoints in pairs(breakpoints[lang]) do
     for line in pairs(file_breakpoints) do
-      events.emit(events.DEBUGGER_BREAKPOINT_ADDED, lexer, file, line)
+      events.emit(events.DEBUGGER_BREAKPOINT_ADDED, lang, file, line)
     end
   end
-  if not watches[lexer] then watches[lexer] = {n = 0} end
-  for i = 1, watches[lexer].n do
-    local watch = watches[lexer][i]
-    if watch then events.emit(events.DEBUGGER_WATCH_ADDED, lexer, watch, i) end
+  if not watches[lang] then watches[lang] = {n = 0} end
+  for i = 1, watches[lang].n do
+    local watch = watches[lang][i]
+    if watch then events.emit(events.DEBUGGER_WATCH_ADDED, lang, watch, i) end
   end
   ui.statusbar_text = _L['Debugger started']
   events.disconnect(events.UPDATE_UI, update_statusbar) -- just in case
@@ -483,16 +483,16 @@ end
 -- not at a breakpoint).
 -- If no debugger is running, starts one, then continues execution.
 -- Emits a `DEBUGGER_CONTINUE` event, passing along any arguments given.
--- @param lexer Optional lexer name of the language to continue executing. The
---   default value is the current lexer.
+-- @param lang Optional lexer name of the language to continue executing. The
+--   default value is the name of the current lexer.
 -- @name continue
-function M.continue(lexer, ...)
-  if not lexer then lexer = buffer:get_lexer() end
-  if states[lexer] and states[lexer].executing then return end
-  if not states[lexer] and not M.start(lexer) then return end
+function M.continue(lang, ...)
+  if not lang then lang = buffer:get_lexer() end
+  if states[lang] and states[lang].executing then return end
+  if not states[lang] and not M.start(lang) then return end
   buffer:marker_delete_all(MARK_DEBUGLINE)
-  states[lexer].executing = true
-  events.emit(events.DEBUGGER_CONTINUE, lexer, ...)
+  states[lang].executing = true
+  events.emit(events.DEBUGGER_CONTINUE, lang, ...)
 end
 
 ---
@@ -502,12 +502,12 @@ end
 -- Emits a `DEBUGGER_STEP_INTO` event, passing along any arguments given.
 -- @name step_into
 function M.step_into(...)
-  local lexer = buffer:get_lexer()
-  if states[lexer] and states[lexer].executing then return end
-  if not states[lexer] and not M.start(lexer) then return end
+  local lang = buffer:get_lexer()
+  if states[lang] and states[lang].executing then return end
+  if not states[lang] and not M.start(lang) then return end
   buffer:marker_delete_all(MARK_DEBUGLINE)
-  states[lexer].executing = true
-  events.emit(events.DEBUGGER_STEP_INTO, lexer, ...)
+  states[lang].executing = true
+  events.emit(events.DEBUGGER_STEP_INTO, lang, ...)
 end
 
 ---
@@ -517,12 +517,12 @@ end
 -- Emits a `DEBUGGER_STEP_OVER` event, passing along any arguments given.
 -- @name step_over
 function M.step_over(...)
-  local lexer = buffer:get_lexer()
-  if states[lexer] and states[lexer].executing then return end
-  if not states[lexer] and not M.start(lexer) then return end
+  local lang = buffer:get_lexer()
+  if states[lang] and states[lang].executing then return end
+  if not states[lang] and not M.start(lang) then return end
   buffer:marker_delete_all(MARK_DEBUGLINE)
-  states[lexer].executing = true
-  events.emit(events.DEBUGGER_STEP_OVER, lexer, ...)
+  states[lang].executing = true
+  events.emit(events.DEBUGGER_STEP_OVER, lang, ...)
 end
 
 ---
@@ -532,11 +532,11 @@ end
 -- given.
 -- @name step_out
 function M.step_out(...)
-  local lexer = buffer:get_lexer()
-  if not states[lexer] or states[lexer].executing then return end
+  local lang = buffer:get_lexer()
+  if not states[lang] or states[lang].executing then return end
   buffer:marker_delete_all(MARK_DEBUGLINE)
-  states[lexer].executing = true
-  events.emit(events.DEBUGGER_STEP_OUT, lexer, ...)
+  states[lang].executing = true
+  events.emit(events.DEBUGGER_STEP_OUT, lang, ...)
 end
 
 ---
@@ -545,9 +545,9 @@ end
 -- Emits a `DEBUGGER_PAUSE` event, passing along any additional arguments given.
 -- @name pause
 function M.pause(...)
-  local lexer = buffer:get_lexer()
-  if not states[lexer] or not states[lexer].executing then return end
-  events.emit(events.DEBUGGER_PAUSE, lexer, ...)
+  local lang = buffer:get_lexer()
+  if not states[lang] or not states[lang].executing then return end
+  events.emit(events.DEBUGGER_PAUSE, lang, ...)
 end
 
 ---
@@ -555,24 +555,24 @@ end
 -- Emits a `DEBUGGER_PAUSE` event, passing along any additional arguments given.
 -- @name restart
 function M.restart(...)
-  local lexer = buffer:get_lexer()
-  if not states[lexer] then return end -- not debugging
-  events.emit(events.DEBUGGER_RESTART, lexer, ...)
+  local lang = buffer:get_lexer()
+  if not states[lang] then return end -- not debugging
+  events.emit(events.DEBUGGER_RESTART, lang, ...)
 end
 
 ---
 -- Stops debugging.
 -- Debuggers should call this function when finished.
 -- Emits a `DEBUGGER_STOP` event, passing along any arguments given.
--- @param lexer Optional lexer name of the language to stop debugging. The
---   default value is the current lexer.
+-- @param lang Optional lexer name of the language to stop debugging. The
+--   default value is the name of the current lexer.
 -- @name stop
-function M.stop(lexer, ...)
-  if not lexer then lexer = buffer:get_lexer() end
-  if not states[lexer] then return end -- not debugging
-  events.emit(events.DEBUGGER_STOP, lexer, ...)
+function M.stop(lang, ...)
+  if not lang then lang = buffer:get_lexer() end
+  if not states[lang] then return end -- not debugging
+  events.emit(events.DEBUGGER_STOP, lang, ...)
   buffer:marker_delete_all(MARK_DEBUGLINE)
-  states[lexer] = nil
+  states[lang] = nil
   events.disconnect(events.UPDATE_UI, update_statusbar)
   ui.statusbar_text = _L['Debugger stopped']
 end
@@ -610,15 +610,15 @@ end
 -- Displays a dialog with variables in the current stack frame.
 -- @name variables
 function M.variables()
-  local lexer = buffer:get_lexer()
-  if not states[lexer] or states[lexer].executing then return end
+  local lang = buffer:get_lexer()
+  if not states[lang] or states[lang].executing then return end
   local names = {}
-  for k in pairs(states[lexer].variables) do names[#names + 1] = k end
+  for k in pairs(states[lang].variables) do names[#names + 1] = k end
   table.sort(names)
   local variables = {}
   for _, name in ipairs(names) do
     variables[#variables + 1] = name
-    variables[#variables + 1] = states[lexer].variables[name]
+    variables[#variables + 1] = states[lang].variables[name]
   end
   ui.dialogs.filteredlist{
     title = _L['Variables'], columns = {_L['Name'], _L['Value']},
@@ -633,16 +633,16 @@ end
 -- Emits a `DEBUGGER_SET_FRAME` event.
 -- @name set_frame
 function M.set_frame()
-  local lexer = buffer:get_lexer()
-  if not states[lexer] or states[lexer].executing then return end
-  local call_stack = states[lexer].call_stack
+  local lang = buffer:get_lexer()
+  if not states[lang] or states[lang].executing then return end
+  local call_stack = states[lang].call_stack
   local button, level = ui.dialogs.dropdown{
     title = _L['Call Stack'], items = call_stack,
     select = call_stack.pos or 1, button1 = _L['OK'],
     button2 = _L['Set Frame']
   }
   if button ~= 2 then return end
-  events.emit(events.DEBUGGER_SET_FRAME, lexer, tonumber(level))
+  events.emit(events.DEBUGGER_SET_FRAME, lang, tonumber(level))
 end
 
 ---
@@ -652,9 +652,9 @@ end
 -- @param position The buffer position to inspect.
 -- @name inspect
 function M.inspect(position)
-  local lexer = buffer:get_lexer()
-  if not states[lexer] or states[lexer].executing then return end
-  events.emit(events.DEBUGGER_INSPECT, lexer, position or buffer.current_pos)
+  local lang = buffer:get_lexer()
+  if not states[lang] or states[lang].executing then return end
+  events.emit(events.DEBUGGER_INSPECT, lang, position or buffer.current_pos)
 end
 
 -- Sets view properties for debug markers.
@@ -678,10 +678,10 @@ end)
 
 -- Update breakpoints after switching buffers.
 events.connect(events.BUFFER_AFTER_SWITCH, function()
-  local lexer, file = buffer:get_lexer(), buffer.filename
-  if not breakpoints[lexer] or not breakpoints[lexer][file] then return end
+  local lang, file = buffer:get_lexer(), buffer.filename
+  if not breakpoints[lang] or not breakpoints[lang][file] then return end
   buffer:marker_delete_all(MARK_BREAKPOINT)
-  for line in pairs(breakpoints[lexer][file]) do
+  for line in pairs(breakpoints[lang][file]) do
     buffer:marker_add(line, MARK_BREAKPOINT)
   end
 end)
@@ -711,8 +711,8 @@ for i = 1, #menubar do
       {_L['Evaluate...'], function()
         -- TODO: command entry loses focus when run from select command
         -- dialog. This works fine when run from menu directly.
-        local lexer = buffer:get_lexer()
-        if not states[lexer] or states[lexer].executing then return end
+        local lang = buffer:get_lexer()
+        if not states[lang] or states[lang].executing then return end
         ui.command_entry.run(function(text)
           events.emit(events.DEBUGGER_COMMAND, buffer:get_lexer(), text)
         end, 'lua')
@@ -738,9 +738,9 @@ keys.f9 = M.toggle_breakpoint
 
 -- Automatically load a language debugger when a file of that language is
 -- opened.
-events.connect(events.LEXER_LOADED, function(lexer)
-  if package.searchpath('debugger.' .. lexer, package.path) then
-    require('debugger.' .. lexer)
+events.connect(events.LEXER_LOADED, function(name)
+  if package.searchpath('debugger.' .. name, package.path) then
+    require('debugger.' .. name)
   end
 end)
 

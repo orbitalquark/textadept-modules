@@ -28,7 +28,7 @@ local json = require('lsp.dkjson')
 --   Emitted by [`lsp.start()`]().
 --   Arguments:
 --
---   * _`lexer`_: The lexer language of the LSP.
+--   * _`lang`_: The lexer name of the LSP language.
 --   * _`server`_: The LSP server.
 -- @field _G.events.LSP_NOTIFICATION (string)
 --   Emitted when an LSP server emits an unhandled notification.
@@ -37,7 +37,7 @@ local json = require('lsp.dkjson')
 --   An event handler should return `true`.
 --   Arguments:
 --
---   * _`lexer`_: The lexer language of the LSP.
+--   * _`lang`_: The lexer name of the LSP language.
 --   * _`server`_: The LSP server.
 --   * _`method`_: The string LSP notification method name.
 --   * _`params`_: The table of LSP notification params. Contents may be
@@ -97,7 +97,7 @@ M.INDIC_ERROR = _SCINTILLA.next_indic_number()
 M.show_all_diagnostics = false
 
 ---
--- Map of lexer languages to LSP language server commands or configurations, or
+-- Map of lexer names to LSP language server commands or configurations, or
 -- functions that return either a server command or a configuration.
 -- Commands are simple string shell commands. Configurations are tables with the
 -- following keys:
@@ -109,7 +109,7 @@ M.show_all_diagnostics = false
 -- @name server_commands
 M.server_commands = {}
 
--- Map of lexer languages to active LSP servers.
+-- Map of lexer names to active LSP servers.
 local servers = {}
 
 -- Map of LSP CompletionItemKinds to images used in autocompletion lists.
@@ -158,17 +158,17 @@ local Server = {}
 
 ---
 -- Starts, initializes, and returns a new language server.
--- @param lexer Lexer language of the language server.
+-- @param lang Lexer name of the language server.
 -- @param cmd String command to start the language server.
 -- @param init_options Optional table of options to be passed to the language
 --   server for initialization.
-function Server.new(lexer, cmd, init_options)
+function Server.new(lang, cmd, init_options)
   local root = assert(io.get_project_root(), _L['No project root found'])
   local current_view = view
   ui._print('[LSP]', 'Starting language server: ' .. cmd)
   ui.goto_view(current_view)
   local server = setmetatable(
-    {lexer = lexer, request_id = 0}, {__index = Server})
+    {lang = lang, request_id = 0}, {__index = Server})
   server.proc = assert(os.spawn(
     cmd, root, function(output) server:handle_stdout(output) end,
     function(output) server:log(output) end,
@@ -233,7 +233,7 @@ function Server.new(lexer, cmd, init_options)
   })
   server.capabilities = result.capabilities
   server:notify('initialized') -- required by protocol
-  events.emit(events.LSP_INITIALIZED, server.lexer, server)
+  events.emit(events.LSP_INITIALIZED, server.lang, server)
   return server
 end
 
@@ -417,7 +417,7 @@ function Server:handle_notification(method, params)
       end
     end
   elseif not events.emit(
-           events.LSP_NOTIFICATION, self.lexer, self, method, params) then
+           events.LSP_NOTIFICATION, self.lang, self, method, params) then
     -- Unknown notification.
     self:log('unexpected notification: ' .. method)
   end
@@ -453,20 +453,20 @@ end
 -- Starts a language server based on the current language.
 -- @name start
 function M.start()
-  local lexer = buffer:get_lexer()
-  if servers[lexer] then return end -- already running
-  servers[lexer] = true -- sentinel until initialization is complete
-  local cmd, init_options = M.server_commands[lexer], nil
+  local lang = buffer:get_lexer()
+  if servers[lang] then return end -- already running
+  servers[lang] = true -- sentinel until initialization is complete
+  local cmd, init_options = M.server_commands[lang], nil
   if type(cmd) == 'function' then cmd, init_options = cmd() end
   if type(cmd) == 'table' then
     cmd, init_options = cmd.command, cmd.init_options
   end
-  local ok, server = pcall(Server.new, lexer, cmd, init_options)
-  servers[lexer] = ok and server or nil -- replace sentinel
+  local ok, server = pcall(Server.new, lang, cmd, init_options)
+  servers[lang] = ok and server or nil -- replace sentinel
   assert(ok, server)
   -- Send file opened notifications for open files.
   for _, buffer in ipairs(_BUFFERS) do
-    if buffer.filename and buffer:get_lexer() == lexer then
+    if buffer.filename and buffer:get_lexer() == lang then
       server:notify_opened(buffer)
     end
   end
@@ -753,8 +753,8 @@ function M.find_references()
 end
 
 -- Automatically start language servers if possible.
-events.connect(events.LEXER_LOADED, function(lexer)
-  if M.server_commands[lexer] then M.start() end
+events.connect(events.LEXER_LOADED, function(name)
+  if M.server_commands[name] then M.start() end
 end)
 
 -- Notify language servers when files are opened.

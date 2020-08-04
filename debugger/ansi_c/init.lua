@@ -79,8 +79,8 @@ end
 -- Launches the given executable in a separate process and uses stdin/stdout
 -- for communication. A string of command line arguments, a string working
 -- directory, and a table environment for the executable are optional.
-events.connect(events.DEBUGGER_START, function(lexer, exe, args, cwd, env)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' or not exe then return end
+events.connect(events.DEBUGGER_START, function(lang, exe, args, cwd, env)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' or not exe then return end
   local args = {
     string.format('gdb -interpreter mi2 --args %s %s', exe, args or ''),
     cwd or exe:match('^.+[/\\]') or lfs.currentdir(),
@@ -99,8 +99,8 @@ events.connect(events.DEBUGGER_START, function(lexer, exe, args, cwd, env)
 end)
 
 -- Handle gdb continuation commands.
-events.connect(events.DEBUGGER_CONTINUE, function(lexer)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_CONTINUE, function(lang)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   if not run then
     pid = run_command('-exec-run'):match('pid="(%d+)"')
     run = true
@@ -108,30 +108,30 @@ events.connect(events.DEBUGGER_CONTINUE, function(lexer)
     run_command('-exec-continue')
   end
 end)
-events.connect(events.DEBUGGER_STEP_INTO, function(lexer)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
-  if not run then events.emit(events.DEBUGGER_CONTINUE, lexer) end
+events.connect(events.DEBUGGER_STEP_INTO, function(lang)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
+  if not run then events.emit(events.DEBUGGER_CONTINUE, lang) end
   run_command('-exec-step')
 end)
-events.connect(events.DEBUGGER_STEP_OVER, function(lexer)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
-  if not run then events.emit(events.DEBUGGER_CONTINUE, lexer) end
+events.connect(events.DEBUGGER_STEP_OVER, function(lang)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
+  if not run then events.emit(events.DEBUGGER_CONTINUE, lang) end
   run_command('-exec-next')
 end)
-events.connect(events.DEBUGGER_STEP_OUT, function(lexer)
-  if lexer == 'ansi_c' or lexer == 'cpp' then run_command('-exec-finish') end
+events.connect(events.DEBUGGER_STEP_OUT, function(lang)
+  if lang == 'ansi_c' or lang == 'cpp' then run_command('-exec-finish') end
 end)
-events.connect(events.DEBUGGER_PAUSE, function(lexer)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' or not pid then return end
+events.connect(events.DEBUGGER_PAUSE, function(lang)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' or not pid then return end
   os.execute('kill -2 ' .. pid) -- SIGINT
 end)
-events.connect(events.DEBUGGER_RESTART, function(lexer)
-  if lexer == 'ansi_c' or lexer == 'cpp' then run_command('-exec-run') end
+events.connect(events.DEBUGGER_RESTART, function(lang)
+  if lang == 'ansi_c' or lang == 'cpp' then run_command('-exec-run') end
 end)
 
 -- Stops the gdb debugger.
-events.connect(events.DEBUGGER_STOP, function(lexer)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_STOP, function(lang)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   if pid then os.execute('kill -2 ' .. pid) end -- SIGINT
   proc:write('-gdb-exit', '\n')
   if proc and proc:status() ~= 'terminated' then proc:kill() end
@@ -142,28 +142,28 @@ end)
 -- Since gdb creates breakpoints for watches (watchpoints), they both must share
 -- the same ID pool. Handle that here and do not consider the default watch ID
 -- implementation.
-events.connect(events.DEBUGGER_BREAKPOINT_ADDED, function(lexer, file, line)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_BREAKPOINT_ADDED, function(lang, file, line)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   local location = string.format('%s:%d', file, line)
   run_command('-break-insert ' .. location)
   breakpoints.n = breakpoints.n + watchpoints.n + 1
   breakpoints[breakpoints.n], breakpoints[location] = location, breakpoints.n
 end)
-events.connect(events.DEBUGGER_BREAKPOINT_REMOVED, function(lexer, file, line)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_BREAKPOINT_REMOVED, function(lang, file, line)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   local location = string.format('%s:%d', file, line)
   local id = breakpoints[location]
   run_command('-break-delete ' .. id)
   breakpoints[id], breakpoints[location] = nil, nil
 end)
-events.connect(events.DEBUGGER_WATCH_ADDED, function(lexer, var, id)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_WATCH_ADDED, function(lang, var, id)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   run_command('-break-watch ' .. var)
   watchpoints.n = breakpoints.n + watchpoints.n + 1
   watchpoints[watchpoints.n], watchpoints[var] = var, watchpoints.n
 end)
-events.connect(events.DEBUGGER_WATCH_REMOVED, function(lexer, var, id)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_WATCH_REMOVED, function(lang, var, id)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   id = watchpoints[var] -- TODO: handle duplicates
   run_command('-break-delete ' .. id)
   watchpoints[id], watchpoints[var] = nil, nil
@@ -171,15 +171,15 @@ events.connect(events.DEBUGGER_WATCH_REMOVED, function(lexer, var, id)
 end)
 
 -- Set the current stack frame.
-events.connect(events.DEBUGGER_SET_FRAME, function(lexer, level)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_SET_FRAME, function(lang, level)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   run_command('-stack-select-frame ' .. (level - 1))
   update_state()
 end)
 
 -- Inspect the value of the symbol/variable at a given position.
-events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_INSPECT, function(lang, pos)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   if buffer:name_of_style(buffer.style_at[pos]) ~= 'identifier' then return end
   local s = buffer:position_from_line(buffer:line_from_position(pos))
   local e = buffer:word_end_position(pos, true)
@@ -193,8 +193,8 @@ events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
 end)
 
 -- Evaluate an arbitrary expression.
-events.connect(events.DEBUGGER_COMMAND, function(lexer, text)
-  if lexer ~= 'ansi_c' and lexer ~= 'cpp' then return end
+events.connect(events.DEBUGGER_COMMAND, function(lang, text)
+  if lang ~= 'ansi_c' and lang ~= 'cpp' then return end
   local output = run_command('-data-evaluate-expression ' .. text)
   local value = output:match('value="(.*)"')
   if value then ui.print(value) end

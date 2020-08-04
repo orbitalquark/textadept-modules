@@ -103,8 +103,8 @@ end
 -- If the given script is '-', listens for an incoming connection for up to 5
 -- seconds by default. The external script should call
 -- `require('mobdebug').start()` to connect to Textadept.
-events.connect(events.DEBUGGER_START, function(lexer, filename, args, timeout)
-  if lexer ~= 'lua' then return end
+events.connect(events.DEBUGGER_START, function(lang, filename, args, timeout)
+  if lang ~= 'lua' then return end
   if not filename then filename = buffer.filename end
   if not server then
     server = require('socket').bind('*', mobdebug.port)
@@ -131,26 +131,26 @@ events.connect(events.DEBUGGER_START, function(lexer, filename, args, timeout)
 end)
 
 -- Handle Lua debugger continuation commands.
-events.connect(events.DEBUGGER_CONTINUE, function(lexer)
-  if lexer == 'lua' then handle_continuation('run') end
+events.connect(events.DEBUGGER_CONTINUE, function(lang)
+  if lang == 'lua' then handle_continuation('run') end
 end)
-events.connect(events.DEBUGGER_STEP_INTO, function(lexer)
-  if lexer == 'lua' then handle_continuation('step') end
+events.connect(events.DEBUGGER_STEP_INTO, function(lang)
+  if lang == 'lua' then handle_continuation('step') end
 end)
-events.connect(events.DEBUGGER_STEP_OVER, function(lexer)
-  if lexer == 'lua' then handle_continuation('over') end
+events.connect(events.DEBUGGER_STEP_OVER, function(lang)
+  if lang == 'lua' then handle_continuation('over') end
 end)
-events.connect(events.DEBUGGER_STEP_OUT, function(lexer)
-  if lexer == 'lua' then handle_continuation('out') end
+events.connect(events.DEBUGGER_STEP_OUT, function(lang)
+  if lang == 'lua' then handle_continuation('out') end
 end)
 -- Note: events.DEBUGGER_PAUSE not supported.
-events.connect(events.DEBUGGER_RESTART, function(lexer)
-  if lexer == 'lua' then handle_continuation('reload') end
+events.connect(events.DEBUGGER_RESTART, function(lang)
+  if lang == 'lua' then handle_continuation('reload') end
 end)
 
 -- Stops the Lua debugger.
-events.connect(events.DEBUGGER_STOP, function(lexer)
-  if lexer ~= 'lua' then return end
+events.connect(events.DEBUGGER_STOP, function(lang)
+  if lang ~= 'lua' then return end
   mobdebug.handle('exit', client)
   client:close()
   client = nil
@@ -161,29 +161,29 @@ events.connect(events.DEBUGGER_STOP, function(lexer)
 end)
 
 -- Add and remove breakpoints and watches.
-events.connect(events.DEBUGGER_BREAKPOINT_ADDED, function(lexer, file, line)
-  if lexer == 'lua' then handle(string.format('setb %s %d', file, line)) end
+events.connect(events.DEBUGGER_BREAKPOINT_ADDED, function(lang, file, line)
+  if lang == 'lua' then handle(string.format('setb %s %d', file, line)) end
 end)
-events.connect(events.DEBUGGER_BREAKPOINT_REMOVED, function(lexer, file, line)
-  if lexer == 'lua' then handle(string.format('delb %s %d', file, line)) end
+events.connect(events.DEBUGGER_BREAKPOINT_REMOVED, function(lang, file, line)
+  if lang == 'lua' then handle(string.format('delb %s %d', file, line)) end
 end)
-events.connect(events.DEBUGGER_WATCH_ADDED, function(lexer, expr, id)
-  if lexer == 'lua' then handle('setw ' .. expr) end
+events.connect(events.DEBUGGER_WATCH_ADDED, function(lang, expr, id)
+  if lang == 'lua' then handle('setw ' .. expr) end
 end)
-events.connect(events.DEBUGGER_WATCH_REMOVED, function(lexer, expr, id)
-  if lexer == 'lua' then handle('delw ' .. id) end
+events.connect(events.DEBUGGER_WATCH_REMOVED, function(lang, expr, id)
+  if lang == 'lua' then handle('delw ' .. id) end
 end)
 
 -- Set the current stack frame.
-events.connect(events.DEBUGGER_SET_FRAME, function(lexer, level)
+events.connect(events.DEBUGGER_SET_FRAME, function(lang, level)
   -- Unimplemented.
   -- TODO: just jump to location? Note that inspect will not work and variables
   -- should probably come from call stack?
 end)
 
 -- Inspect the value of a symbol/variable at a given position.
-events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
-  if lexer ~= 'lua' then return end
+events.connect(events.DEBUGGER_INSPECT, function(lang, pos)
+  if lang ~= 'lua' then return end
   if buffer:name_of_style(buffer.style_at[pos]) ~= 'identifier' then return end
   local s = buffer:position_from_line(buffer:line_from_position(pos))
   local e = buffer:word_end_position(pos, true)
@@ -195,8 +195,8 @@ events.connect(events.DEBUGGER_INSPECT, function(lexer, pos)
 end)
 
 -- Evaluate an arbitrary expression.
-events.connect(events.DEBUGGER_COMMAND, function(lexer, text)
-  if lexer == 'lua' then handle('exec ' .. text) end
+events.connect(events.DEBUGGER_COMMAND, function(lang, text)
+  if lang == 'lua' then handle('exec ' .. text) end
 end)
 
 return M

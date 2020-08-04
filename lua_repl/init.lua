@@ -126,6 +126,7 @@ function M.complete_lua()
     end
   end
   table.sort(cmpls)
+  buffer.auto_c_order = buffer.ORDER_PRESORTED
   buffer:auto_c_show(
     #part - 1, table.concat(cmpls, string.char(buffer.auto_c_separator)))
 end

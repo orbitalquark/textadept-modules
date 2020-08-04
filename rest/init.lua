@@ -158,9 +158,9 @@ textadept.editing.api_files.rest = {
 -- Commands.
 
 -- Add '`' to autopaired and typeover characters.
-events.connect(events.LEXER_LOADED, function(lexer)
+events.connect(events.LEXER_LOADED, function(name)
   if textadept.editing.auto_pairs and textadept.editing.typeover_chars then
-    local rest = lexer == 'rest'
+    local rest = name == 'rest'
     textadept.editing.auto_pairs[string.byte('`')] = rest and '`' or nil
     textadept.editing.typeover_chars[string.byte('`')] = rest and 1 or nil
   end
@@ -168,8 +168,8 @@ end)
 
 -- Enable folding by the Sphinx convention for detected Sphinx files:
 -- # > * > = > - > ^ > ".
-events.connect(events.LEXER_LOADED, function(lexer)
-  if lexer == 'rest' and buffer:get_line(1):find('^%s*%.%. .-sphinx') then
+events.connect(events.LEXER_LOADED, function(name)
+  if name == 'rest' and buffer:get_line(1):find('^%s*%.%. .-sphinx') then
     view.property['fold.by.sphinx.convention'] = '1'
     buffer:colorize(1, buffer.end_styled)
   end

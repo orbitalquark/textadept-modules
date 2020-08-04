@@ -15,8 +15,8 @@ local M = {}
 module('_M.ruby')]]
 
 -- Sets default buffer properties for Ruby files.
-events.connect(events.LEXER_LOADED, function(lang)
-  if lang ~= 'ruby' then return end
+events.connect(events.LEXER_LOADED, function(name)
+  if name ~= 'ruby' then return end
   buffer.word_chars =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_?!'
 end)

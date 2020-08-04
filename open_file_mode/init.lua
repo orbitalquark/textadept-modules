@@ -62,6 +62,7 @@ function ui.command_entry.open_file()
         table.sort(files)
         local sep = ui.command_entry.auto_c_separator
         ui.command_entry.auto_c_separator = string.byte(';')
+        ui.command_entry.auto_c_order = buffer.ORDER_PRESORTED
         ui.command_entry:auto_c_show(#part, table.concat(files, ';'))
         ui.command_entry.auto_c_separator = sep -- restore
       end

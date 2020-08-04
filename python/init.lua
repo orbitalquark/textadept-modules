@@ -14,8 +14,8 @@ local M = {}
 module('_M.python')]]
 
 -- Sets default buffer properties for Python files.
-events.connect(events.LEXER_LOADED, function(lang)
-  if lang ~= 'python' then return end
+events.connect(events.LEXER_LOADED, function(name)
+  if name ~= 'python' then return end
   buffer.use_tabs, buffer.tab_width = false, 4
 end)
 

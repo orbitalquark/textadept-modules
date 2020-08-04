@@ -100,8 +100,7 @@ M.ctags_flags = {}
 -- strings, that generate an *api* file that Textadept can read via
 -- [`textadept.editing.show_documentation()`]().
 -- The user is responsible for adding the generated api file to
--- `textadept.editing.api_files[lexer]` for each lexer language the file applies
--- to.
+-- `textadept.editing.api_files[lexer]` for each lexer name the file applies to.
 -- @class table
 -- @name api_commands
 -- @see textadept.editing.api_files

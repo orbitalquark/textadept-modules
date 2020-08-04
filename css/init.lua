@@ -9,8 +9,8 @@ local M = {}
 module('_M.css')]]
 
 -- Sets default buffer properties for CSS files.
-events.connect(events.LEXER_LOADED, function(lang)
-  if lang ~= 'css' then return end
+events.connect(events.LEXER_LOADED, function(name)
+  if name ~= 'css' then return end
   buffer.word_chars =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
 end)

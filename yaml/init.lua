@@ -17,8 +17,8 @@ local _, lyaml = pcall(require, 'yaml.lyaml')
 M.lyaml = lyaml
 
 -- Always use spaces.
-events.connect(events.LEXER_LOADED, function(lexer)
-  if lexer ~= 'yaml' then return end
+events.connect(events.LEXER_LOADED, function(name)
+  if name ~= 'yaml' then return end
   buffer.use_tabs = false
   buffer.word_chars = table.concat{
     'abcdefghijklmnopqrstuvwxyz',
