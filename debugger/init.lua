@@ -15,16 +15,16 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- Linux / Win32 | Mac OSX | Terminal | Command
--- --------------|---------|----------|--------
--- **Debug**     |         |          |
--- F5            |F5       |F5        |Start debugging
--- F10           |F10      |F10       |Step over
--- F11           |F11      |F11       |Step into
--- Shift+F11     |⇧F11     |S-F11     |Step out
--- Shift+F5      |⇧F5      |S-F5      |Stop debugging
--- Alt+=         |⌘=       |M-=       |Inspect variable
--- Alt++         |⌘+       |M-+       |Evaluate expression...
+-- Windows, Linux, BSD|macOS|Terminal|Command
+-- -------------------|-----|--------|-------
+-- **Debug**          |     |        |
+-- F5                 |F5   |F5      |Start debugging
+-- F10                |F10  |F10     |Step over
+-- F11                |F11  |F11     |Step into
+-- Shift+F11          |⇧F11 |S-F11   |Step out
+-- Shift+F5           |⇧F5  |S-F5    |Stop debugging
+-- Alt+=              |⌘=   |M-=     |Inspect variable
+-- Alt++              |⌘+   |M-+     |Evaluate expression...
 --
 -- @field _G.events.DEBUGGER_BREAKPOINT_ADDED (string)
 --   Emitted when a breakpoint is added.

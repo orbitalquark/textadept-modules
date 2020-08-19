@@ -26,11 +26,11 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- Linux / Win32 | Mac OSX | Terminal | Command
--- --------------|---------|----------|--------
--- **Tools**     |         |          |
--- F7            |F7       |F7        |Check spelling interactively
--- Shift+F7      |⇧F7      |S-F7      |Mark misspelled words
+-- Windows, Linux, BSD|macOS|Terminal|Command
+-- -------------------|-----|--------|-------
+-- **Tools**          |     |        |
+-- F7                 |F7   |F7      |Check spelling interactively
+-- Shift+F7           |⇧F7  |S-F7    |Mark misspelled words
 --
 -- @field check_spelling_on_save (bool)
 --   Check spelling after saving files.

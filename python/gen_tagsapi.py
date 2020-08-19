@@ -303,7 +303,7 @@ modules = [
   #'syslog',
   #'commands',
 
-  # Mac OSX Specific Services
+  # macOS Specific Services
   #'ic',
   #'MacOS',
   #'macostools',

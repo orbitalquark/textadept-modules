@@ -54,11 +54,11 @@
 --
 -- ## Key Bindings
 --
--- Linux / Win32 | Mac OSX | Terminal | Command
--- --------------|---------|----------|--------
--- **Search**    |         |          |
--- F12           |F12      |F12       |Goto Ctag
--- Shift+F12     |⇧F12     |S-F12     |Goto Ctag...
+-- Windows, Linux, BSD|macOS|Terminal|Command
+-- -------------------|-----|--------|-------
+-- **Search**         |     |        |
+-- F12                |F12  |F12     |Goto Ctag
+-- Shift+F12          |⇧F12 |S-F12   |Goto Ctag...
 --
 -- @field _G.textadept.editing.autocompleters.ctag (function)
 --   Autocompleter function for ctags. (Names only; not context-sensitive).

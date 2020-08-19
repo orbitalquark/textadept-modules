@@ -18,11 +18,11 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- Linux / Win32 | Mac OSX | Terminal | Command
--- --------------|---------|----------|--------
--- **Edit**      |         |          |
--- Alt+,         |^,       |M-,       |Navigate backward
--- Alt+.         |^.       |M-.       |Navigate forward
+-- Windows, Linux, BSD|macOS|Terminal|Command
+-- -------------------|-----|--------|-------
+-- **Edit**           |     |        |
+-- Alt+,              |^,   |M-,     |Navigate backward
+-- Alt+.              |^.   |M-.     |Navigate forward
 --
 -- @field minimum_line_distance (number)
 --   The minimum number of lines between distinct history records.

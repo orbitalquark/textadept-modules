@@ -31,15 +31,15 @@ local M = {}
 --
 -- ## Key Bindings
 --
--- Linux / Win32 | Mac OSX | Terminal | Command
--- --------------|---------|----------|--------
--- **Tools**     |         |          |
--- F6            |F6       |F6        |Compare files...
--- Shift+F6      |⇧F6      |S-F6      |Compare the buffers in two split views
--- Alt+Down      |⌥⇣       |M-Down    |Goto next difference
--- Alt+Up        |⌥⇡       |M-Up      |Goto previous difference
--- Alt+Left      |⌥⇠       |M-Left    |Merge left
--- Alt+Right     |⌥⇢       |M-Right   |Merge right
+-- Windows, Linux, BSD|macOS|Terminal|Command
+-- -------------------|-----|--------|-------
+-- **Tools**          |     |        |
+-- F6                 |F6   |F6      |Compare files...
+-- Shift+F6           |⇧F6  |S-F6    |Compare the buffers in two split views
+-- Alt+Down           |⌥⇣   |M-Down  |Goto next difference
+-- Alt+Up             |⌥⇡   |M-Up    |Goto previous difference
+-- Alt+Left           |⌥⇠   |M-Left  |Merge left
+-- Alt+Right          |⌥⇢   |M-Right |Merge right
 --
 -- @field theme (string)
 --   The theme to use, either 'dark' or 'light'.
