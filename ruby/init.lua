@@ -7,7 +7,7 @@ local M = {}
 -- The ruby module.
 -- It provides utilities for editing Ruby code.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- + `Shift+Enter` (`⇧↩` | `S-Enter`)
 --   Try to autocomplete an `if`, `while`, `for`, etc. control structure with

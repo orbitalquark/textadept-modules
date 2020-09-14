@@ -7,7 +7,7 @@ local M = {}
 -- The reST module.
 -- It provides utilities for editing reST and Sphinx documents.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- + `Ctrl+Alt+J` (`^⌘J` | `M-S-J`)
 --   Jump to the selected section.

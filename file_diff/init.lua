@@ -10,7 +10,7 @@ local M = {}
 -- This module is not loaded by default. `require('file_diff')` must be called
 -- from *~/.textadept/init.lua*.
 --
--- ## Usage
+-- ### Usage
 --
 -- A sample workflow is this:
 --
@@ -29,7 +29,7 @@ local M = {}
 -- between changes, even if one buffer has a change and the other does not
 -- (additions or deletions).
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- Windows, Linux, BSD|macOS|Terminal|Command
 -- -------------------|-----|--------|-------
@@ -100,11 +100,7 @@ end
 local lib = 'file_diff.diff'
 if OSX then
   lib = lib .. 'osx'
-elseif not WIN32 then
-  local p = io.popen('uname -i')
-  if p:read('*a'):find('64') then lib = lib .. '64' end
-  p:close()
-elseif CURSES then
+elseif WIN32 and CURSES then
   lib = lib .. '-curses'
 end
 local diff = require(lib)
@@ -372,7 +368,7 @@ end
 ---
 -- Jumps to the next or previous difference between the two files depending on
 -- boolean *next*.
--- [`start()`]() must have been called previously.
+-- [`file_diff.start()`]() must have been called previously.
 -- @param next Whether to go to the next or previous difference relative to the
 --   current line.
 -- @name goto_change

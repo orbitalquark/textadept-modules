@@ -7,7 +7,7 @@ local M = {}
 -- The YAML module.
 -- It provides utilities for editing YAML documents.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- + `Ctrl+&` (`⌘&` | `M-&`)
 --   Jump to the anchor for the alias under the caret.

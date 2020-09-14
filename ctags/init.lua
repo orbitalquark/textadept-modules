@@ -25,7 +25,7 @@
 --
 -- Textadept will use any and all *tags* files based on the above rules.
 --
--- ## Generating Ctags and API Documentation
+-- ### Generating Ctags and API Documentation
 --
 -- This module can also help generate Ctags files and API documentation files
 -- that can be read by Textadept. This is typically configured per-project.
@@ -52,7 +52,7 @@
 -- Then, invoking Search > Ctags > Generate Project Tags and API menu item will
 -- generate the tags and api files.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- Windows, Linux, BSD|macOS|Terminal|Command
 -- -------------------|-----|--------|-------

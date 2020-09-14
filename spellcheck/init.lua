@@ -24,7 +24,7 @@ local M = {}
 --
 -- [Hunspell]: http://hunspell.github.io/
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- Windows, Linux, BSD|macOS|Terminal|Command
 -- -------------------|-----|--------|-------
@@ -62,11 +62,7 @@ end
 local lib = 'spellcheck.spell'
 if OSX then
   lib = lib .. 'osx'
-elseif not WIN32 then
-  local p = io.popen('uname -i')
-  if p:read('*a'):find('64') then lib = lib .. '64' end
-  p:close()
-elseif CURSES then
+elseif WIN32 and CURSES then
   lib = lib .. '-curses'
 end
 M.spell = require(lib)

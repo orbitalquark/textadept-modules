@@ -13,7 +13,7 @@ local M = {}
 -- This module is not loaded by default. `require('debugger')` must be called
 -- from *~/.textadept/init.lua*.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- Windows, Linux, BSD|macOS|Terminal|Command
 -- -------------------|-----|--------|-------

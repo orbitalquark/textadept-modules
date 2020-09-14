@@ -7,7 +7,7 @@ local M = {}
 -- The python module.
 -- It provides utilities for editing Python code.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- + `Shift+Enter` (`⇧↩` | `S-Enter`)
 --   Add ':' to the end of the current line and insert a newline.

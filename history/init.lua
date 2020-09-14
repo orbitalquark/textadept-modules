@@ -16,7 +16,7 @@ local M = {}
 -- location history. If the edit is close enough to the previous record, the
 -- previous record is amended.
 --
--- ## Key Bindings
+-- ### Key Bindings
 --
 -- Windows, Linux, BSD|macOS|Terminal|Command
 -- -------------------|-----|--------|-------

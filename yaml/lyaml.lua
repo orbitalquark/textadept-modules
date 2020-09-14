@@ -25,13 +25,7 @@
 -- Andrew Danforth <acd@weirdness.net>
 
 local lib = "yaml.libyaml"
-if OSX then
-  lib = lib..'osx'
-else
-  local p = io.popen('uname -i')
-  if p:read('a'):find('64') then lib = lib..'64' end
-  p:close()
-end
+if OSX then lib = lib..'osx' end
 local yaml = require(lib)
 
 
