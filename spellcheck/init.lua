@@ -22,7 +22,7 @@ local M = {}
 --
 -- At this time, this module does not work in the terminal version on Win32.
 --
--- [Hunspell]: http://hunspell.github.io/
+-- [Hunspell]: https://hunspell.github.io/
 --
 -- ### Key Bindings
 --

@@ -43,7 +43,7 @@
 --     table.insert(textadept.editing.api_files.lua, '/path/to/project/api')
 --
 --     -- Use Textadept's tags and api generator, which depends on LuaDoc
---     -- (http://keplerproject.github.io/luadoc/) being installed.
+--     -- (https://keplerproject.github.io/luadoc/) being installed.
 --     ctags.ctags_flags['/path/to/project'] = ctags.LUA_GENERATOR
 --     ctags.api_commands['/path/to/project'] = ctags.LUA_GENERATOR
 --     table.insert(require('lua').tags, '/path/to/project/tags')
