@@ -1,4 +1,4 @@
-// Copyright 2017-2020 Mitchell mitchell.att.foicica.com. See LICENSE.
+// Copyright 2017-2020 Mitchell. See LICENSE.
 
 #include "diff_match_patch.h"
 

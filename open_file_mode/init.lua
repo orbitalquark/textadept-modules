@@ -1,4 +1,4 @@
--- Copyright 2019-2020 Mitchell mitchell.att.foicica.com.
+-- Copyright 2019-2020 Mitchell.
 
 --[[ This comment is for LuaDoc
 ---

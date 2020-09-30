@@ -1,4 +1,4 @@
-# Copyright 2012-2020 Mitchell mitchell.att.foicica.com. See LICENSE.
+# Copyright 2012-2020 Mitchell. See LICENSE.
 
 # This script uses Python to generate tags and apidoc for the Textadept Python
 # module. To regenerate, modify the list of modules as necessary and then run
